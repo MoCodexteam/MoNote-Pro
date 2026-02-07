@@ -1,4 +1,4 @@
-package com.example.monotepro;
+package com.mocodex.monotepro;
 
 import io.flutter.embedding.android.FlutterActivity;
 

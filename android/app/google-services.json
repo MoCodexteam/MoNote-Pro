@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "253985665522",
+    "project_id": "monote-pro-c8353",
+    "storage_bucket": "monote-pro-c8353.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253985665522:android:634f17abc8a2e635c5fb6b",
+        "android_client_info": {
+          "package_name": "com.example.monotepro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT4TdXaD7u2yIoEK8sBvc_F_46HivB45U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:253985665522:android:455496c9042d4c7bc5fb6b",
+        "android_client_info": {
+          "package_name": "com.mocodex.monotepro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT4TdXaD7u2yIoEK8sBvc_F_46HivB45U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
