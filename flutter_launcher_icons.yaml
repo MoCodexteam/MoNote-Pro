@@ -1,0 +1,10 @@
+flutter_launcher_icons:
+  android: "monotepro"          # ← الصح: كل صغير، بدون مسافات
+  ios: true
+
+  image_path: "lib/assets/icon/logo.png"
+
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "lib/assets/icon/logo.png"
+
+  min_sdk_android: 21

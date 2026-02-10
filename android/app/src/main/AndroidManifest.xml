@@ -3,7 +3,7 @@
     <application
         android:label="monotepro"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/monotepro">
         <activity
             android:name=".MainActivity"
             android:exported="true"

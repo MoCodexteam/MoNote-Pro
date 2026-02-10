@@ -187,40 +187,115 @@ class AuthWrapper extends ConsumerWidget {
 }
 
 /// Splash Screen (with your logo)
+// lib/features/auth/presentation/screens/splash_screen.dart
+// (or keep it in main.dart if you prefer)
+
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: Stack(
           children: [
-            Image.asset(
-              'lib/assets/images/logo.png',
-              width: 140,
-              height: 140,
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'MoNote Pro',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+            // Main centered content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Your logo
+                  Image.asset(
+                    'lib/assets/images/logo.png',
+                    width: 140,
+                    height: 140,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // App name
+                  Text(
+                    'MoNote Pro',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Tagline
+                  Text(
+                    'Your smart notes in the cloud',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+
+                  // Loading indicator
+                  const CircularProgressIndicator(),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Your smart notes in the cloud',
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+
+            // Developer credit (bottom center, subtle, like Meta/Facebook style)
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Developed by',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Small team logo/icon (optional – replace with your team logo if you have one)
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [Colors.blueAccent, Colors.tealAccent],
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'MC', // ← MC = MoCodex (or change to your initials/logo)
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'MoCodex Team',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 48),
-            const CircularProgressIndicator(),
           ],
         ),
       ),
