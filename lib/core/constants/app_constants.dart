@@ -78,4 +78,5 @@ class AppConstants {
   static const String sessionExpiredMessage = 'انتهت الجلسة، يرجى تسجيل الدخول مجدداً';
   static const String weakPasswordMessage = 'كلمة المرور ضعيفة جدًا، يجب أن تحتوي على 6 أحرف على الأقل';
   static const String emailAlreadyInUse = 'البريد الإلكتروني مستخدم بالفعل';
+  static const String noteFieldCategoryColor = 'categoryColor';
 }
