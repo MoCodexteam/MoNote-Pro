@@ -1,7 +1,6 @@
 // lib/features/home/presentation/widgets/note_card.dart
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../note/domain/entities/note_entity.dart';
 

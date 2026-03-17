@@ -101,6 +101,15 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     );
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      final authRemoteDataSource = AuthRemoteDataSourceImpl();
+      await authRemoteDataSource.sendPasswordResetEmail(email);
+    } catch (e) {
+      throw Exception('Failed to send password reset email: $e');
+    }
+  }
+
   /// Manually refresh current user state
   Future<void> refresh() => _loadCurrentUser();
 }

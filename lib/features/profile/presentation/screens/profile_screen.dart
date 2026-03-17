@@ -1,19 +1,13 @@
 // lib/features/profile/presentation/screens/profile_screen.dart
 
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
 import '/core/theme/theme_provider.dart';
-import '../../../note/domain/entities/note_entity.dart';
 import '../../../note/presentation/providers/notes_provider.dart';
 
 /// شاشة الملف الشخصي والإعدادات – كاملة الوظائف
@@ -23,13 +17,21 @@ import '../../../note/presentation/providers/notes_provider.dart';
 /// - تبديل Dark Mode مع حفظ دائم
 /// - تصدير جميع الملاحظات كـ JSON (مشاركة أو حفظ)
 /// - تسجيل الخروج
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final VoidCallback onBack;
 
   const ProfileScreen({super.key, required this.onBack});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isSyncing = false;
+  String _syncStatus = 'All changes saved';
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).currentUser;
     final themeMode = ref.watch(themeModeProvider);
 
@@ -38,7 +40,7 @@ class ProfileScreen extends ConsumerWidget {
     final notesCount = notesAsync.value?.length ?? 0;
     final pinnedCount = notesAsync.value?.where((n) => n.isPinned).length ?? 0;
 
-    // عدد الفئات الفريدة (محسوب من الملاحظات)
+    // عدد الفئات الفريقة (محسوب من الملاحظات)
     final categoriesCount = notesAsync.value
         ?.map((n) => n.category)
         .where((c) => c != null && c.isNotEmpty)
@@ -221,14 +223,27 @@ class ProfileScreen extends ConsumerWidget {
 
           // Data & Sync
           ListTile(
-            leading: const Icon(Icons.sync, color: Colors.green),
-            title: const Text('Sync Status'),
-            subtitle: const Text('All changes saved'),
-            trailing: Container(
-              width: 12,
-              height: 12,
-              decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+            leading: Icon(
+              _isSyncing ? Icons.sync_problem : Icons.sync, 
+              color: _isSyncing ? Colors.orange : Colors.green,
             ),
+            title: const Text('Sync Status'),
+            subtitle: Text(_isSyncing ? 'Syncing...' : _syncStatus),
+            trailing: _isSyncing 
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: _syncStatus == 'All changes saved' ? Colors.green : Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+            onTap: () => _performManualSync(ref),
           ),
 
           const Divider(height: 1),
@@ -266,5 +281,54 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _performManualSync(WidgetRef ref) async {
+    if (_isSyncing) return;
+
+    setState(() {
+      _isSyncing = true;
+      _syncStatus = 'Syncing...';
+    });
+
+    try {
+      // Simulate sync process - in real app, this would sync with backend
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // Force refresh of notes to simulate sync
+      ref.invalidate(notesStreamProvider);
+      
+      setState(() {
+        _isSyncing = false;
+        _syncStatus = 'All changes saved';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sync completed successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isSyncing = false;
+        _syncStatus = 'Sync failed';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sync failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void onBack() {
+
   }
 }

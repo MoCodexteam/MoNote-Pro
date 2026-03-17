@@ -2,12 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../note/domain/entities/note_entity.dart';
 import '../../../note/presentation/providers/categories_provider.dart';
 import '../../../note/presentation/providers/notes_provider.dart';
-import '../../../home/presentation/widgets/note_card.dart';
 import '../../../note/presentation/screens/create_edit_note_screen.dart';
 
 /// شاشة البحث المتقدم (Search Screen)

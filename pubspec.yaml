@@ -24,6 +24,10 @@ dependencies:
   # Form validation (ممتاز لـ login/signup forms)
   formz: ^0.7.0
 
+  # Performance & caching
+  cached_network_image: ^3.3.1    # Image caching for better performance
+  flutter_staggered_animations: ^1.1.1  # Smooth animations
+
   dartz: ^0.10.1
 
   # Icons (Cupertino لـ iOS style إذا أردنا)

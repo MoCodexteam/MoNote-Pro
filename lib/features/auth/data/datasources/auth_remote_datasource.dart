@@ -31,6 +31,9 @@ abstract class AuthRemoteDataSource {
 
   /// Stream of authentication state changes
   Stream<UserModel?> authStateChanges();
+
+  /// Sends password reset email to the user
+  Future<void> sendPasswordResetEmail(String email);
 }
 
 /// Concrete implementation using Firebase Auth & Firestore
@@ -170,5 +173,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         return null;
       }
     });
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      throw AuthFailure.fromFirebaseCode(e.code);
+    } catch (e) {
+      throw ServerFailure(e.toString());
+    }
   }
 }

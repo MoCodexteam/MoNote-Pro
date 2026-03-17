@@ -66,14 +66,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
-  void _handleSocialLogin(String provider) {
-    // Demo registration as in React version
-    ref.read(authNotifierProvider.notifier).signUp(
-      email: 'demo@monote.pro',
-      password: 'password',
-      fullName: 'Demo User',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +90,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                 const SizedBox(height: 32),
 
-                // Social buttons
-                _buildSocialButtons(context),
 
                 const SizedBox(height: 32),
 
@@ -168,7 +158,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           AuthTextFormField(
             controller: _fullNameController,
             label: 'Full Name',
-            hint: 'Alex Johnson',
+            hint: 'Enter Your Full Name',
             prefixIcon: Icons.person_outline,
             keyboardType: TextInputType.name,
             errorText: _fullName.displayError,
@@ -180,7 +170,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           AuthTextFormField(
             controller: _emailController,
             label: 'Email',
-            hint: 'alex@example.com',
+            hint: 'Enter Email',
             prefixIcon: Icons.mail_outline,
             keyboardType: TextInputType.emailAddress,
             errorText: _email.displayError,
@@ -242,56 +232,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSocialButtons(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'or continue with',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _handleSocialLogin('google'),
-                icon: const Icon(Icons.g_mobiledata, size: 24),
-                label: const Text('Google'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _handleSocialLogin('github'),
-                icon: const Icon(Icons.code, size: 20),
-                label: const Text('GitHub'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 

@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../domain/entities/note_entity.dart';
 import '../models/note_model.dart';
 
 /// Remote data source responsible for all direct Firestore operations related to notes.

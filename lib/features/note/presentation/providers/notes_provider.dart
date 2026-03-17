@@ -1,6 +1,5 @@
 // lib/features/note/presentation/providers/notes_provider.dart
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/providers/auth_notifier.dart';

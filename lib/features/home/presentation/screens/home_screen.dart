@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../note/domain/entities/note_entity.dart';
 import '../../../note/presentation/providers/notes_provider.dart';
+import '../../../note/presentation/providers/categories_provider.dart';
 import '../../../note/presentation/screens/create_edit_note_screen.dart';
 import '../../../home/presentation/widgets/note_card.dart';
 import '../../../categories/presentation/screens/categories_screen.dart';
@@ -62,8 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 setState(() => _currentIndex = 0);
               },
               onSelectCategory: (categoryName) {
-                // TODO: فلتر الملاحظات حسب الفئة في الـ Home
-                // مثال: ref.read(selectedCategoryProvider.notifier).state = categoryName;
+                ref.read(selectedCategoryProvider.notifier).state = categoryName;
                 setState(() => _currentIndex = 0);
               },
             ),
@@ -103,7 +102,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // Tab 0: محتوى الـ Home (الملاحظات)
   // ────────────────────────────────────────────────
   Widget _buildHomeTab(BuildContext context) {
-    final notesAsync = ref.watch(notesStreamProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final notesAsync = selectedCategory == null 
+        ? ref.watch(notesStreamProvider)
+        : ref.watch(categoryFilteredNotesProvider);
 
     return Column(
       children: [
@@ -152,6 +154,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   : ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
+                  if (selectedCategory != null) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.filter_list,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Filtered by: $selectedCategory',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.clear, size: 20),
+                            onPressed: () {
+                              ref.read(selectedCategoryProvider.notifier).state = null;
+                            },
+                            tooltip: 'Clear filter',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   if (pinnedNotes.isNotEmpty) ...[
                     _buildSectionHeader(context, 'Pinned', Icons.push_pin),
                     ...pinnedNotes.asMap().entries.map(
@@ -165,7 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                   if (regularNotes.isNotEmpty) ...[
                     if (pinnedNotes.isNotEmpty)
-                      _buildSectionHeader(context, 'All Notes', null),
+                      _buildSectionHeader(context, selectedCategory != null ? 'Notes in this category' : 'All Notes', null),
                     ...regularNotes.asMap().entries.map(
                           (e) => NoteCard(
                         note: e.value,

@@ -123,6 +123,91 @@ class _CreateEditNoteScreenState extends ConsumerState<CreateEditNoteScreen> {
     setState(() => _isPinned = !_isPinned);
   }
 
+  void _formatText(String format) {
+    final text = _contentController.text;
+    final selection = _contentController.selection;
+    
+    if (selection.isValid) {
+      final selectedText = text.substring(selection.start, selection.end);
+      String formattedText;
+      
+      switch (format) {
+        case 'bold':
+          formattedText = '**$selectedText**';
+          break;
+        case 'italic':
+          formattedText = '*$selectedText*';
+          break;
+        case 'code':
+          formattedText = '`$selectedText`';
+          break;
+        case 'checklist':
+          formattedText = '\n- [ ] $selectedText';
+          break;
+        default:
+          formattedText = selectedText;
+      }
+      
+      final newText = text.replaceRange(selection.start, selection.end, formattedText);
+      _contentController.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: selection.start + formattedText.length),
+      );
+    }
+  }
+
+  Future<void> _deleteNote() async {
+    if (widget.existingNote == null) return;
+
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final actions = ref.read(notesActionsProvider);
+      await actions.deleteNote(widget.existingNote!.id);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Note deleted successfully')),
+        );
+        widget.onBack();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting note: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,6 +258,14 @@ class _CreateEditNoteScreenState extends ConsumerState<CreateEditNoteScreen> {
                     ),
                     onPressed: _togglePin,
                   ),
+                  if (widget.existingNote != null)
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      onPressed: _deleteNote,
+                    ),
                   IconButton(
                     icon: Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
                     onPressed: _isSaving ? null : _saveNote,
@@ -204,24 +297,24 @@ class _CreateEditNoteScreenState extends ConsumerState<CreateEditNoteScreen> {
 
                     const SizedBox(height: 16),
 
-                    // شريط الأدوات (placeholder حاليًا)
+                    // شريط الأدوات 
                     Row(
                       children: [
                         IconButton(
                           icon: const Icon(Icons.format_bold),
-                          onPressed: () {}, // TODO: تنسيق bold
+                          onPressed: () => _formatText('bold'),
                         ),
                         IconButton(
                           icon: const Icon(Icons.format_italic),
-                          onPressed: () {},
+                          onPressed: () => _formatText('italic'),
                         ),
                         IconButton(
                           icon: const Icon(Icons.code),
-                          onPressed: () {},
+                          onPressed: () => _formatText('code'),
                         ),
                         IconButton(
                           icon: const Icon(Icons.checklist),
-                          onPressed: () {},
+                          onPressed: () => _formatText('checklist'),
                         ),
                       ],
                     ),
@@ -285,7 +378,7 @@ class _CreateEditNoteScreenState extends ConsumerState<CreateEditNoteScreen> {
 
                     // إدخال التاجات
                     Text(
-                      'Crowns (separated by commas)',
+                      'Tags (separated by commas)',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),

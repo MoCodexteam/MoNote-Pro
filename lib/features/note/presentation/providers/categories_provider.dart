@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/category_entity.dart';
+import '../../domain/entities/note_entity.dart';
 import 'notes_provider.dart'; // لربط عدد الملاحظات لكل فئة
 
 /// قائمة الفئات المتاحة (ثابتة حاليًا – يمكن جلبها من Firestore لاحقًا)
@@ -39,4 +40,26 @@ final enrichedCategoriesProvider = Provider<List<CategoryEntity>>((ref) {
     final count = stats[cat.name] ?? 0;
     return cat.copyWith(noteCount: count);
   }).toList();
+});
+
+/// Provider for selected category filter
+final selectedCategoryProvider = StateProvider<String?>((ref) => null);
+
+/// Provider for filtered notes by category
+final categoryFilteredNotesProvider = Provider<AsyncValue<List<NoteEntity>>>((ref) {
+  final notesAsync = ref.watch(notesStreamProvider);
+  final selectedCategory = ref.watch(selectedCategoryProvider);
+  
+  return notesAsync.when(
+    data: (notes) {
+      if (selectedCategory == null || selectedCategory.isEmpty) {
+        return AsyncValue.data(notes);
+      }
+      
+      final filteredNotes = notes.where((note) => note.category == selectedCategory).toList();
+      return AsyncValue.data(filteredNotes);
+    },
+    loading: () => const AsyncValue.loading(),
+    error: (error, stack) => AsyncValue.error(error, stack),
+  );
 });

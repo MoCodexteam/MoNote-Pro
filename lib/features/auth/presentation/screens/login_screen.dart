@@ -9,6 +9,7 @@ import '../../../../core/utils/validators.dart';
 import '../providers/auth_notifier.dart';
 import '../providers/auth_state.dart';
 import '../widgets/auth_text_form_field.dart';
+import 'forgot_password_screen.dart';
 
 /// Flutter equivalent of the React LoginScreen
 /// Clean, modern UI with Riverpod state management + Formz validation
@@ -60,13 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void _handleSocialLogin(String provider) {
-    // Demo login as in React version
-    ref.read(authNotifierProvider.notifier).signIn(
-      email: 'demo@monote.pro',
-      password: 'password',
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,8 +85,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 32),
 
-                // Social buttons
-                _buildSocialButtons(context),
 
                 const SizedBox(height: 32),
 
@@ -161,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           AuthTextFormField(
             controller: _emailController,
             label: 'Email',
-            hint: 'alex@example.com',
+            hint: 'Enter your Email',
             prefixIcon: Icons.mail_outline,
             keyboardType: TextInputType.emailAddress,
             errorText: _email.displayError,
@@ -193,7 +185,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                // TODO: Navigate to Forgot Password
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ForgotPasswordScreen(),
+                  ),
+                );
               },
               child: Text(
                 'Forgot password?',
@@ -233,57 +230,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-
-  Widget _buildSocialButtons(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'or continue with',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _handleSocialLogin('google'),
-                icon: const Icon(Icons.g_mobiledata, size: 24),
-                label: const Text('Google'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _handleSocialLogin('github'),
-                icon: const Icon(Icons.code, size: 20),
-                label: const Text('GitHub'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildRegisterLink(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

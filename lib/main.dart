@@ -1,15 +1,12 @@
 // lib/main.dart
 
-import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
-import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/providers/auth_notifier.dart';
-import 'features/auth/presentation/providers/auth_state.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/signup_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart'; // ← الاستيراد الجديد للشاشة الكاملة
