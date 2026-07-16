@@ -26,8 +26,20 @@ abstract class NotesRepository {
       NoteEntity note,
       );
 
-  /// Deletes a note by its ID
+  /// Soft-deletes a note by moving it to the trash
   Future<Either<Failure, Unit>> deleteNote(
+      String userId,
+      String noteId,
+      );
+
+  /// Restores a deleted note from the trash
+  Future<Either<Failure, Unit>> restoreNote(
+      String userId,
+      String noteId,
+      );
+
+  /// Permanently deletes a note from Firestore
+  Future<Either<Failure, Unit>> deleteNotePermanently(
       String userId,
       String noteId,
       );
@@ -39,8 +51,14 @@ abstract class NotesRepository {
       bool newPinValue,
       );
 
+  /// Toggles the archive status of a note
+  Future<Either<Failure, Unit>> toggleArchive(
+      String userId,
+      String noteId,
+      bool newArchiveValue,
+      );
+
 // Optional future methods (can be added later):
 // Future<Either<Failure, NoteEntity>> getNoteById(String userId, String noteId);
-// Future<Either<Failure, Unit>> archiveNote(String userId, String noteId);
 // Future<Either<Failure, List<NoteEntity>>> searchNotes(String userId, String query);
 }

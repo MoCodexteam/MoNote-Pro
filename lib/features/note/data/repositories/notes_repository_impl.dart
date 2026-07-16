@@ -39,6 +39,11 @@ class NotesRepositoryImpl implements NotesRepository {
         category: note.category,
         categoryColor: note.categoryColor,
         isPinned: note.isPinned,
+        isArchived: note.isArchived,
+        checklistItems: note.checklistItems,
+        reminderEnabled: note.reminderEnabled,
+        reminderDate: note.reminderDate,
+        reminderInterval: note.reminderInterval,
       );
 
       await _remoteDataSource.createNote(userId, model);
@@ -63,6 +68,11 @@ class NotesRepositoryImpl implements NotesRepository {
         category: note.category,
         categoryColor: note.categoryColor,
         isPinned: note.isPinned,
+        isArchived: note.isArchived,
+        checklistItems: note.checklistItems,
+        reminderEnabled: note.reminderEnabled,
+        reminderDate: note.reminderDate,
+        reminderInterval: note.reminderInterval,
       );
 
       await _remoteDataSource.updateNote(userId, model);
@@ -87,12 +97,48 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> restoreNote(String userId, String noteId) async {
+    try {
+      await _remoteDataSource.restoreNote(userId, noteId);
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Firestore error during note restoration'));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteNotePermanently(String userId, String noteId) async {
+    try {
+      await _remoteDataSource.deleteNotePermanently(userId, noteId);
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Firestore error during permanent note deletion'));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> togglePin(String userId, String noteId, bool newPinValue) async {
     try {
       await _remoteDataSource.togglePin(userId, noteId, newPinValue);
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(ServerFailure(e.message ?? 'Firestore error during pin toggle'));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> toggleArchive(String userId, String noteId, bool newArchiveValue) async {
+    try {
+      await _remoteDataSource.toggleArchive(userId, noteId, newArchiveValue);
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Firestore error during archive toggle'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }

@@ -16,11 +16,20 @@ abstract class NotesRemoteDataSource {
   /// Updates an existing note
   Future<void> updateNote(String userId, NoteModel note);
 
-  /// Deletes a note by its ID
+  /// Soft-deletes a note by moving it to the trash
   Future<void> deleteNote(String userId, String noteId);
+
+  /// Restores a deleted note from the trash
+  Future<void> restoreNote(String userId, String noteId);
+
+  /// Permanently deletes a note from Firestore
+  Future<void> deleteNotePermanently(String userId, String noteId);
 
   /// Toggles the pin status of a note
   Future<void> togglePin(String userId, String noteId, bool newPinValue);
+
+  /// Toggles the archive status of a note
+  Future<void> toggleArchive(String userId, String noteId, bool newArchiveValue);
 }
 
 /// Concrete implementation using Firebase Firestore
@@ -70,6 +79,32 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
         .doc(userId)
         .collection('notes')
         .doc(noteId)
+        .update({
+          'isDeleted': true,
+          'deletedAt': Timestamp.now(),
+        });
+  }
+
+  @override
+  Future<void> restoreNote(String userId, String noteId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(noteId)
+        .update({
+          'isDeleted': false,
+          'deletedAt': FieldValue.delete(),
+        });
+  }
+
+  @override
+  Future<void> deleteNotePermanently(String userId, String noteId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(noteId)
         .delete();
   }
 
@@ -81,5 +116,15 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
         .collection('notes')
         .doc(noteId)
         .update({'pin': newPinValue});
+  }
+
+  @override
+  Future<void> toggleArchive(String userId, String noteId, bool newArchiveValue) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(noteId)
+        .update({'isArchived': newArchiveValue});
   }
 }

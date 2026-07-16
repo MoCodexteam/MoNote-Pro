@@ -15,12 +15,18 @@ class NoteCard extends StatelessWidget {
   final NoteEntity note;
   final int index; // Used for staggered animation delay
   final VoidCallback onTap;
+  final VoidCallback? onArchive;
+  final VoidCallback? onPin;
+  final VoidCallback? onDelete;
 
   const NoteCard({
     super.key,
     required this.note,
     required this.index,
     required this.onTap,
+    this.onArchive,
+    this.onPin,
+    this.onDelete,
   });
 
   @override
@@ -103,6 +109,71 @@ class NoteCard extends StatelessWidget {
                                   fill: 1.0, // filled pin
                                 ),
                               ),
+                            if (onArchive != null || onPin != null || onDelete != null)
+                              PopupMenuButton<String>(
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  size: 20,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'archive' && onArchive != null) {
+                                    onArchive!();
+                                  } else if (value == 'pin' && onPin != null) {
+                                    onPin!();
+                                  } else if (value == 'delete' && onDelete != null) {
+                                    onDelete!();
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  if (onPin != null)
+                                    PopupMenuItem(
+                                      value: 'pin',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(note.isPinned ? 'Unpin' : 'Pin'),
+                                        ],
+                                      ),
+                                    ),
+                                  if (onArchive != null)
+                                    PopupMenuItem(
+                                      value: 'archive',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            note.isArchived ? Icons.unarchive : Icons.archive,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(note.isArchived ? 'Unarchive' : 'Archive'),
+                                        ],
+                                      ),
+                                    ),
+                                  if (onDelete != null)
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete_outline,
+                                            size: 18,
+                                            color: Theme.of(context).colorScheme.error,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Delete',
+                                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
                           ],
                         ),
 
@@ -122,6 +193,27 @@ class NoteCard extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 12),
+
+                        if (note.checklistItems.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_box_outlined,
+                                  size: 16,
+                                  color: colorScheme.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '${note.checklistItems.where((item) => item.isCompleted).length}/${note.checklistItems.length} completed',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
                         // Footer row
                         Wrap(

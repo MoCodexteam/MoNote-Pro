@@ -3,6 +3,33 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+class NoteChecklistItem extends Equatable {
+  final String id;
+  final String text;
+  final bool isCompleted;
+
+  const NoteChecklistItem({
+    required this.id,
+    required this.text,
+    this.isCompleted = false,
+  });
+
+  NoteChecklistItem copyWith({
+    String? id,
+    String? text,
+    bool? isCompleted,
+  }) {
+    return NoteChecklistItem(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      isCompleted: isCompleted ?? this.isCompleted,
+    );
+  }
+
+  @override
+  List<Object?> get props => [id, text, isCompleted];
+}
+
 /// Pure domain entity for a Note in MoNote Pro
 /// No Firebase/JSON dependencies here – clean and testable
 class NoteEntity extends Equatable {
@@ -13,8 +40,17 @@ class NoteEntity extends Equatable {
   final String? category;
   final List<String> tags;
   final bool isPinned;
+  final bool isArchived;
+  final bool isDeleted;
+  final DateTime? deletedAt;
   final DateTime lastEdit;      // آخر تعديل
   final Color? categoryColor;   // للـ UI فقط (اختياري – يمكن تخزينه كـ hex string)
+  final List<NoteChecklistItem> checklistItems;
+  
+  // Notification fields
+  final bool reminderEnabled;   // تفعيل التذكير
+  final DateTime? reminderDate; // تاريخ التذكير
+  final int? reminderInterval;  // فترة التكرار بالأيام (مثلاً 3 = كل 3 أيام)
 
   const NoteEntity({
     required this.id,
@@ -26,6 +62,13 @@ class NoteEntity extends Equatable {
     this.category,
     this.categoryColor,
     this.isPinned = false,
+    this.isArchived = false,
+    this.isDeleted = false,
+    this.deletedAt,
+    this.checklistItems = const [],
+    this.reminderEnabled = false,
+    this.reminderDate,
+    this.reminderInterval,
   });
 
   // Copy with for immutable updates
@@ -39,6 +82,13 @@ class NoteEntity extends Equatable {
     String? category,
     Color? categoryColor,
     bool? isPinned,
+    bool? isArchived,
+    bool? isDeleted,
+    DateTime? deletedAt,
+    List<NoteChecklistItem>? checklistItems,
+    bool? reminderEnabled,
+    DateTime? reminderDate,
+    int? reminderInterval,
   }) {
     return NoteEntity(
       id: id ?? this.id,
@@ -50,6 +100,13 @@ class NoteEntity extends Equatable {
       category: category ?? this.category,
       categoryColor: categoryColor ?? this.categoryColor,
       isPinned: isPinned ?? this.isPinned,
+      isArchived: isArchived ?? this.isArchived,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
+      checklistItems: checklistItems ?? this.checklistItems,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderDate: reminderDate ?? this.reminderDate,
+      reminderInterval: reminderInterval ?? this.reminderInterval,
     );
   }
 
@@ -64,5 +121,12 @@ class NoteEntity extends Equatable {
     category,
     categoryColor,
     isPinned,
+    isArchived,
+    isDeleted,
+    deletedAt,
+    checklistItems,
+    reminderEnabled,
+    reminderDate,
+    reminderInterval,
   ];
 }

@@ -31,7 +31,7 @@ final currentUserIdProvider = Provider<String?>((ref) {
 // Stream of user's notes (real-time from Firestore)
 // ────────────────────────────────────────────────
 
-final notesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
+final allNotesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
   final userId = ref.watch(currentUserIdProvider);
 
   if (userId == null) {
@@ -41,6 +41,16 @@ final notesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
   final repo = ref.watch(notesRepositoryProvider);
 
   return repo.getUserNotesStream(userId);
+});
+
+final notesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
+  final notesAsync = ref.watch(allNotesStreamProvider);
+
+  return notesAsync.when(
+    data: (notes) => Stream.value(notes.where((note) => !note.isDeleted).toList()),
+    loading: () => Stream.value(<NoteEntity>[]),
+    error: (_, __) => Stream.value(<NoteEntity>[]),
+  );
 });
 
 // ────────────────────────────────────────────────
@@ -120,8 +130,23 @@ class NotesActions {
     await repo.deleteNote(userId!, noteId);
   }
 
+  Future<void> restoreNote(String noteId) async {
+    if (userId == null) throw Exception('User not authenticated');
+    await repo.restoreNote(userId!, noteId);
+  }
+
+  Future<void> deleteNotePermanently(String noteId) async {
+    if (userId == null) throw Exception('User not authenticated');
+    await repo.deleteNotePermanently(userId!, noteId);
+  }
+
   Future<void> togglePin(String noteId, bool currentValue) async {
     if (userId == null) throw Exception('User not authenticated');
     await repo.togglePin(userId!, noteId, !currentValue);
+  }
+
+  Future<void> toggleArchive(String noteId, bool currentValue) async {
+    if (userId == null) throw Exception('User not authenticated');
+    await repo.toggleArchive(userId!, noteId, !currentValue);
   }
 }

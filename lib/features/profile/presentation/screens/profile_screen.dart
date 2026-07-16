@@ -1,9 +1,11 @@
 // lib/features/profile/presentation/screens/profile_screen.dart
 
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../../../core/constants/app_constants.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
@@ -29,20 +31,22 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isSyncing = false;
   String _syncStatus = 'All changes saved';
+  bool _notificationsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authNotifierProvider).currentUser;
     final themeMode = ref.watch(themeModeProvider);
 
-    // إحصائيات حقيقية من Firestore
-    final notesAsync = ref.watch(notesStreamProvider);
-    final notesCount = notesAsync.value?.length ?? 0;
-    final pinnedCount = notesAsync.value?.where((n) => n.isPinned).length ?? 0;
+    final notesAsync = ref.watch(allNotesStreamProvider);
+    final notesCount = notesAsync.value?.where((n) => !n.isDeleted).length ?? 0;
+    final pinnedCount = notesAsync.value?.where((n) => !n.isDeleted && n.isPinned).length ?? 0;
+    final archivedCount = notesAsync.value?.where((n) => !n.isDeleted && n.isArchived).length ?? 0;
+    final trashCount = notesAsync.value?.where((n) => n.isDeleted).length ?? 0;
 
-    // عدد الفئات الفريقة (محسوب من الملاحظات)
     final categoriesCount = notesAsync.value
-        ?.map((n) => n.category)
+        ?.where((n) => !n.isDeleted)
+        .map((n) => n.category)
         .where((c) => c != null && c.isNotEmpty)
         .toSet()
         .length ??
@@ -69,10 +73,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       user,
                       notesCount,
                       pinnedCount,
+                      archivedCount,
+                      trashCount,
                       categoriesCount,
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // الإعدادات
                     _buildSettingsCard(context, themeMode, ref),
@@ -121,6 +127,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       UserEntity? user,
       int notesCount,
       int pinnedCount,
+      int archivedCount,
+      int trashCount,
       int categoriesCount,
       ) {
     return Card(
@@ -176,6 +184,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _buildStatItem(context, Icons.push_pin_outlined, Colors.purple, pinnedCount, 'Pinned'),
               ],
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStatItem(context, Icons.archive_outlined, Colors.orange, archivedCount, 'Archive'),
+                _buildStatItem(context, Icons.delete_outline, Colors.red, trashCount, 'Trash'),
+              ],
+            ),
           ],
         ),
       ),
@@ -187,7 +203,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
           child: Icon(icon, color: color, size: 28),
         ),
         const SizedBox(height: 8),
@@ -197,44 +213,95 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  Widget _buildProfileActionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+    Color? accentColor,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final accent = accentColor ?? colorScheme.primary;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: accent),
+      ),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            )
+          : null,
+      trailing: trailing ?? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+  }
+
   Widget _buildSettingsCard(BuildContext context, ThemeMode themeMode, WidgetRef ref) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          // Dark Mode
-          ListTile(
-            leading: Icon(
-              themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('Dark Mode'),
-            subtitle: Text(themeMode == ThemeMode.dark ? 'Enabled' : 'Disabled'),
+          _buildProfileActionTile(
+            context,
+            icon: Icons.dark_mode_outlined,
+            title: 'Dark Mode',
+            subtitle: themeMode == ThemeMode.dark ? 'Enabled' : 'Disabled',
             trailing: Switch(
               value: themeMode == ThemeMode.dark,
               onChanged: (value) async {
                 final newMode = value ? ThemeMode.dark : ThemeMode.light;
                 ref.read(themeModeProvider.notifier).setTheme(newMode);
               },
+              activeThumbColor: Theme.of(context).colorScheme.primary,
             ),
+            onTap: null,
           ),
           const Divider(height: 1),
 
-          // Data & Sync
-          ListTile(
-            leading: Icon(
-              _isSyncing ? Icons.sync_problem : Icons.sync, 
-              color: _isSyncing ? Colors.orange : Colors.green,
+          _buildProfileActionTile(
+            context,
+            icon: Icons.notifications_outlined,
+            title: 'Notifications',
+            subtitle: _notificationsEnabled ? 'Enabled' : 'Disabled',
+            trailing: Switch(
+              value: _notificationsEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _notificationsEnabled = value;
+                });
+              },
+              activeThumbColor: Theme.of(context).colorScheme.primary,
             ),
-            title: const Text('Sync Status'),
-            subtitle: Text(_isSyncing ? 'Syncing...' : _syncStatus),
-            trailing: _isSyncing 
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+            onTap: null,
+          ),
+          const Divider(height: 1),
+
+          _buildProfileActionTile(
+            context,
+            icon: _isSyncing ? Icons.sync_problem : Icons.sync,
+            title: 'Sync',
+            subtitle: _isSyncing ? 'Syncing...' : _syncStatus,
+            trailing: _isSyncing
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : Container(
                     width: 12,
                     height: 12,
@@ -244,33 +311,216 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
             onTap: () => _performManualSync(ref),
+            accentColor: Colors.green,
           ),
-
           const Divider(height: 1),
 
-          // Sign Out
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Sign Out', style: TextStyle(color: Colors.red)),
-            onTap: () {
-              ref.read(authNotifierProvider.notifier).signOut();
-            },
+          _buildProfileActionTile(
+            context,
+            icon: Icons.archive_outlined,
+            title: 'Archive',
+            subtitle: 'View archived notes',
+            onTap: () => _showNotesList(context, ref, filter: 'archive'),
+            accentColor: Colors.orange,
+          ),
+          const Divider(height: 1),
+
+          _buildProfileActionTile(
+            context,
+            icon: Icons.delete_outline,
+            title: 'Trash',
+            subtitle: 'Restore or remove notes',
+            onTap: () => _showNotesList(context, ref, filter: 'trash'),
+            accentColor: Colors.red,
+          ),
+          const Divider(height: 1),
+
+          _buildProfileActionTile(
+            context,
+            icon: Icons.help_outline,
+            title: 'Help & Support',
+            subtitle: 'Get assistance',
+            onTap: () => _showSupportDialog(context),
+            accentColor: Colors.blue,
+          ),
+          const Divider(height: 1),
+
+          _buildProfileActionTile(
+            context,
+            icon: Icons.logout,
+            title: 'Sign Out',
+            subtitle: 'Exit the current account',
+            onTap: () => ref.read(authNotifierProvider.notifier).signOut(),
+            accentColor: Colors.red,
+          ),
+          const Divider(height: 1),
+
+          _buildProfileActionTile(
+            context,
+            icon: Icons.person_remove_alt_1_outlined,
+            title: 'Delete Account',
+            subtitle: 'Permanently remove your account',
+            onTap: () => _showDeleteAccountDialog(context, ref),
+            accentColor: Colors.deepPurple,
           ),
         ],
       ),
     );
   }
 
-  // ────────────────────────────────────────────────
-  // تصدير الملاحظات كـ JSON (مشاركة أو حفظ)
-  // ────────────────────────────────────────────────
+  void _showSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Help & Support'),
+        content: const Text('For help, contact support at support@monotepro.app or use the in-app feedback option.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showDeleteAccountDialog(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text('This will permanently delete your account and all notes associated with it. Continue?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.delete();
+      }
+      await ref.read(authNotifierProvider.notifier).signOut();
+      if (!mounted) return;
+      messenger?.showSnackBar(const SnackBar(content: Text('Account deleted successfully')));
+    } catch (e) {
+      if (!mounted) return;
+      messenger?.showSnackBar(SnackBar(content: Text('Unable to delete account: $e')));
+    }
+  }
+
+  void _showNotesList(BuildContext context, WidgetRef ref, {required String filter}) {
+    final notesAsync = ref.read(allNotesStreamProvider);
+    final notes = notesAsync.valueOrNull ?? [];
+    final now = DateTime.now();
+    final filtered = notes.where((note) {
+      if (filter == 'archive') return note.isArchived && !note.isDeleted;
+      if (filter == 'trash') {
+        if (!note.isDeleted) return false;
+        final deletedAt = note.deletedAt;
+        if (deletedAt != null && now.difference(deletedAt).inDays >= AppConstants.trashRetentionDays) {
+          Future.microtask(() async {
+            if (!context.mounted) return;
+            await ref.read(notesActionsProvider).deleteNotePermanently(note.id);
+          });
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }).toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        builder: (context, scrollController) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(filter == 'archive' ? 'Archived Notes' : 'Trash', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(child: Text(filter == 'archive' ? 'No archived notes yet' : 'No notes in trash'))
+                      : ListView.builder(
+                          controller: scrollController,
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final note = filtered[index];
+                            return Card(
+                              child: ListTile(
+                                title: Text(note.title.isEmpty ? 'Untitled' : note.title),
+                                subtitle: Text(note.content.isEmpty ? 'No content' : note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (filter == 'trash')
+                                      IconButton(
+                                        icon: const Icon(Icons.restore),
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          final messenger = ScaffoldMessenger.of(context);
+                                          await ref.read(notesActionsProvider).restoreNote(note.id);
+                                          if (!mounted) return;
+                                          messenger.showSnackBar(const SnackBar(content: Text('Note restored')));
+                                        },
+                                      ),
+                                    IconButton(
+                                      icon: Icon(filter == 'trash' ? Icons.delete_forever : Icons.delete_outline),
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                        final messenger = ScaffoldMessenger.of(context);
+                                        if (filter == 'trash') {
+                                          await ref.read(notesActionsProvider).deleteNotePermanently(note.id);
+                                        } else {
+                                          await ref.read(notesActionsProvider).deleteNote(note.id);
+                                        }
+                                        if (!mounted) return;
+                                        messenger.showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              filter == 'trash' ? 'Note permanently deleted' : 'Note moved to trash',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildAppInfo(BuildContext context) {
     return Center(
       child: Column(
         children: [
           Text(
-            'MoNote Pro v1.0.0',
+            'MoNote Pro v2.0.1',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
@@ -292,11 +542,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
 
     try {
-      // Simulate sync process - in real app, this would sync with backend
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Force refresh of notes to simulate sync
+      // Force refresh of notes from Firestore
       ref.invalidate(notesStreamProvider);
+      
+      // Wait for the stream to emit new data
+      await ref.read(notesStreamProvider.future);
       
       setState(() {
         _isSyncing = false;
@@ -308,6 +558,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SnackBar(
             content: Text('Sync completed successfully'),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
           ),
         );
       }
@@ -322,6 +573,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SnackBar(
             content: Text('Sync failed: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }

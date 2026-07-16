@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../note/domain/entities/category_entity.dart';
 import '../../../note/presentation/providers/categories_provider.dart';
+import '../widgets/create_category_dialog.dart';
 
 /// شاشة عرض الفئات (Categories)
 /// تدعم:
@@ -91,6 +92,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             tooltip: _isGridView ? 'Switch to List' : 'Switch to Grid',
             onPressed: () => setState(() => _isGridView = !_isGridView),
           ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.add),
+            color: Theme.of(context).colorScheme.primary,
+            tooltip: 'Create Category',
+            onPressed: () => _showCreateCategoryDialog(context),
+          ),
         ],
       ),
     );
@@ -118,6 +126,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _buildCategoryGridCard(BuildContext context, CategoryEntity category) {
+    final isDefaultCategory = category.userId == 'system';
+    
     return GestureDetector(
       onTap: () => widget.onSelectCategory(category.name),
       child: AnimatedContainer(
@@ -138,37 +148,57 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: category.color.withOpacity(0.25),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.folder_outlined,
-                size: 40,
-                color: category.color,
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: category.color.withOpacity(0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.folder_outlined,
+                    size: 40,
+                    color: category.color,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  category.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: category.color,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${category.noteCount} ${category.noteCount == 1 ? "note" : "notes"}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              category.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: category.color,
+            if (!isDefaultCategory)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 20,
+                  ),
+                  onPressed: () => _showDeleteDialog(context, category),
+                  tooltip: 'Delete category',
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${category.noteCount} ${category.noteCount == 1 ? "note" : "notes"}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
           ],
         ),
       ),
@@ -191,6 +221,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _buildCategoryListCard(BuildContext context, CategoryEntity category) {
+    final isDefaultCategory = category.userId == 'system';
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
@@ -236,10 +268,20 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              if (!isDefaultCategory)
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  onPressed: () => _showDeleteDialog(context, category),
+                  tooltip: 'Delete category',
+                )
+              else
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),
@@ -274,8 +316,68 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Create Category'),
+              onPressed: () => _showCreateCategoryDialog(context),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCreateCategoryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const CreateCategoryDialog(),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, CategoryEntity category) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category'),
+        content: Text(
+          'Are you sure you want to delete "${category.name}"? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              try {
+                await ref.read(categoryActionsProvider).deleteCategory(category.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Category deleted successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete category: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

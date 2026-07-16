@@ -12,6 +12,7 @@ import '../../../note/presentation/screens/create_edit_note_screen.dart';
 import '../../../home/presentation/widgets/note_card.dart';
 import '../../../categories/presentation/screens/categories_screen.dart';
 import '../../../search/presentation/screens/search_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 
 /// الشاشة الرئيسية بعد تسجيل الدخول
 /// تحتوي على Bottom Navigation Bar مع 4 تبويبات:
@@ -138,7 +139,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             data: (notes) {
-              final filteredNotes = notes.where((note) {
+              // Filter out deleted notes first
+              final activeNotes = notes.where((note) => !note.isDeleted).toList();
+              
+              // Apply search filter
+              final filteredNotes = activeNotes.where((note) {
+                if (_searchQuery.isEmpty) return true;
+                
                 final query = _searchQuery.toLowerCase();
                 return note.title.toLowerCase().contains(query) ||
                     note.content.toLowerCase().contains(query) ||
@@ -197,6 +204,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         note: e.value,
                         index: e.key,
                         onTap: () => _onViewNote(e.value),
+                        onPin: () => _onTogglePin(e.value),
+                        onDelete: () => _onDeleteNote(e.value),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -209,6 +218,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         note: e.value,
                         index: e.key + pinnedNotes.length,
                         onTap: () => _onViewNote(e.value),
+                        onPin: () => _onTogglePin(e.value),
+                        onDelete: () => _onDeleteNote(e.value),
                       ),
                     ),
                   ],
@@ -269,8 +280,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 gradient: isActive
                     ? LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.25),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.25),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+                    Theme.of(context).colorScheme.secondary.withValues(alpha: 0.25),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -329,18 +340,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  setState(() => _currentIndex = 3); // الانتقال لتبويب Profile
-                },
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Text(
-                    widget.user.fullName?.substring(0, 1).toUpperCase() ?? '?',
-                    style: const TextStyle(color: Colors.white),
+              Row(
+                children: [
+                  // Notification icon
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationsScreen(
+                            onBack: () => Navigator.pop(context),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.notifications_outlined,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 24,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  // Profile avatar
+                  GestureDetector(
+                    onTap: () {
+                      setState(() => _currentIndex = 3); // الانتقال لتبويب Profile
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        widget.user.fullName?.substring(0, 1).toUpperCase() ?? '?',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -413,6 +455,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _onTogglePin(NoteEntity note) {
+    final actions = ref.read(notesActionsProvider);
+    actions.togglePin(note.id, note.isPinned);
+  }
+
+  void _onDeleteNote(NoteEntity note) {
+    final actions = ref.read(notesActionsProvider);
+    actions.deleteNote(note.id);
   }
 }
 

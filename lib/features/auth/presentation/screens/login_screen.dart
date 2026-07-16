@@ -105,11 +105,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Colors.blueAccent, Colors.tealAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(

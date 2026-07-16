@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/utils/notification_service.dart';
 import 'firebase_options.dart';
 import 'features/auth/presentation/providers/auth_notifier.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
@@ -25,6 +26,14 @@ void main() async {
     // يمكن عرض شاشة خطأ لاحقًا أو إعادة محاولة
   }
 
+  // Initialize notification service
+  try {
+    await NotificationService().initialize();
+    debugPrint('Notification service initialized successfully');
+  } catch (e) {
+    debugPrint('Notification service initialization failed: $e');
+  }
+
   runApp(const ProviderScope(child: MoNoteProApp()));
 }
 
@@ -36,13 +45,13 @@ class MoNoteProApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp(
-      title: 'MoNote Pro',
+      title: 'MoNote',
       debugShowCheckedModeBanner: false,
 
       // استخدام themeMode الديناميكي
       themeMode: themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFFFFFF)),
         useMaterial3: true,
         brightness: Brightness.light,
         scaffoldBackgroundColor: Colors.grey.shade50,
@@ -56,7 +65,7 @@ class MoNoteProApp extends ConsumerWidget {
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
+          seedColor: const Color(0xFF000000),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -164,7 +173,7 @@ class SplashScreen extends StatelessWidget {
                 children: [
                   // Your logo
                   Image.asset(
-                    'lib/assets/images/logo.png', // ← تأكد من المسار والاسم
+                    'lib/assets/images/logo.png',
                     width: 140,
                     height: 140,
                   ),
@@ -172,7 +181,7 @@ class SplashScreen extends StatelessWidget {
 
                   // App name
                   Text(
-                    'MoNote Pro',
+                    'MoNote',
                     style: TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,

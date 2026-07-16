@@ -9,6 +9,7 @@ class CategoryModel extends CategoryEntity {
     required super.id,
     required super.name,
     required super.color,
+    required super.userId,
     super.noteCount,
   });
 
@@ -18,6 +19,7 @@ class CategoryModel extends CategoryEntity {
       id: id,
       name: data['name'] as String? ?? 'Unknown',
       color: _parseColor(data['color'] as String? ?? '#808080'),
+      userId: data['userId'] as String? ?? '',
       noteCount: data['noteCount'] as int? ?? 0,
     );
   }
@@ -27,6 +29,7 @@ class CategoryModel extends CategoryEntity {
     return {
       'name': name,
       'color': _colorToHex(color),
+      'userId': userId,
       'noteCount': noteCount,
     };
   }
@@ -42,6 +45,9 @@ class CategoryModel extends CategoryEntity {
   }
 
   static String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
+
+  /// Converts this model back to the pure domain entity
+  CategoryEntity toEntity() => this;
 }

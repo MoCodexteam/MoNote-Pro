@@ -7,7 +7,7 @@ class AppConstants {
   // App Info
   // ────────────────────────────────────────────────
   static const String appName = 'MoNote Pro';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '2.1.0';
   static const String appDescription = 'تطبيق تدوين الملاحظات الذكي مع المزامنة السحابية';
   static const String developerTeam = 'MoCodex';
 
@@ -34,6 +34,14 @@ class AppConstants {
   static const String noteFieldTags = 'tags';
   static const String noteFieldCategory = 'category';
   static const String noteFieldPin = 'pin';
+  static const String noteFieldArchive = 'isArchived';
+  static const String noteFieldDeleted = 'isDeleted';
+  static const String noteFieldDeletedAt = 'deletedAt';
+  static const String noteFieldChecklistItems = 'checklistItems';
+  static const String noteFieldReminderEnabled = 'reminderEnabled';
+  static const String noteFieldReminderDate = 'reminderDate';
+  static const String noteFieldReminderInterval = 'reminderInterval';
+  static const int trashRetentionDays = 30;
 
   // ────────────────────────────────────────────────
   // UI & Design Constants

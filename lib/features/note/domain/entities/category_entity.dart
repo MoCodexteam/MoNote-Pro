@@ -18,10 +18,14 @@ class CategoryEntity extends Equatable {
   /// Number of notes currently in this category (computed)
   final int noteCount;
 
+  /// User ID who created this category
+  final String userId;
+
   const CategoryEntity({
     required this.id,
     required this.name,
     required this.color,
+    required this.userId,
     this.noteCount = 0,
   });
 
@@ -31,12 +35,14 @@ class CategoryEntity extends Equatable {
     String? name,
     Color? color,
     int? noteCount,
+    String? userId,
   }) {
     return CategoryEntity(
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
       noteCount: noteCount ?? this.noteCount,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -47,5 +53,5 @@ class CategoryEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, color, noteCount];
+  List<Object?> get props => [id, name, color, noteCount, userId];
 }

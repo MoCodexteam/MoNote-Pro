@@ -2,7 +2,7 @@ name: monotepro
 description: "MoNote Pro - First Project by MoCodex Team"
 publish_to: 'none'  # Private app → لا تنشر على pub.dev
 
-version: 1.0.0+1  # زد الـ +1 مع كل build جديد، أو زد الـ version الرئيسي مع releases
+version: 2.0.1+1  # زد الـ +1 مع كل build جديد، أو زد الـ version الرئيسي مع releases
 
 environment:
   sdk: '>=3.3.0 <4.0.0'  # أوسع نطاق للتوافق مع أحدث Flutter (بدل ^3.10.8 الضيق)
@@ -25,8 +25,8 @@ dependencies:
   formz: ^0.7.0
 
   # Performance & caching
-  cached_network_image: ^3.3.1    # Image caching for better performance
-  flutter_staggered_animations: ^1.1.1  # Smooth animations
+  # cached_network_image: ^3.3.1    # Not currently used
+  # flutter_staggered_animations: ^1.1.1  # Not currently used
 
   dartz: ^0.10.1
 
@@ -45,6 +45,10 @@ dependencies:
 
   share_plus: ^7.0.0
   path_provider: ^2.0.0
+
+  # Notifications
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
 
 
 dev_dependencies:
@@ -65,6 +69,7 @@ dev_dependencies:
   change_app_package_name: ^1.5.0
 
   flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
