@@ -93,7 +93,10 @@ class ColorPickerMatrix extends StatelessWidget {
 
   /// Returns white or black color based on the brightness of the given color
   Color _getContrastColor(Color color) {
-    final luminance = (0.299 * (color.r * 255) + 0.587 * (color.g * 255) + 0.114 * (color.b * 255)) / 255;
+    final luminance = (0.299 * (color.r * 255) +
+            0.587 * (color.g * 255) +
+            0.114 * (color.b * 255)) /
+        255;
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 }

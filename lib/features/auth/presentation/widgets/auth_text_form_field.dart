@@ -68,20 +68,20 @@ class AuthTextFormField extends StatelessWidget {
             ),
             prefixIcon: prefixIcon != null
                 ? Icon(
-              prefixIcon,
-              color: colorScheme.onSurfaceVariant,
-              size: 22,
-            )
+                    prefixIcon,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 22,
+                  )
                 : null,
             suffixIcon: suffixIcon ??
                 (onSuffixTap != null
                     ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: onSuffixTap,
-                )
+                        icon: Icon(
+                          obscureText ? Icons.visibility_off : Icons.visibility,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: onSuffixTap,
+                      )
                     : null),
             filled: true,
             fillColor: colorScheme.surfaceContainerHighest,

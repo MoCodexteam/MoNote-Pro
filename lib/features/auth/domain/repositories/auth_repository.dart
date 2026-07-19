@@ -29,4 +29,7 @@ abstract class AuthRepository {
 
   /// Stream of authentication state changes (used for auto-login / redirect)
   Stream<UserEntity?> authStateChanges();
+
+  /// Sends password reset email to the user
+  Future<Either<Failure, Unit>> sendPasswordResetEmail(String email);
 }

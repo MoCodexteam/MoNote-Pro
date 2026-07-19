@@ -16,47 +16,47 @@ abstract class NotesRepository {
 
   /// Creates a new note in the user's notes sub-collection
   Future<Either<Failure, Unit>> createNote(
-      String userId,
-      NoteEntity note,
-      );
+    String userId,
+    NoteEntity note,
+  );
 
   /// Updates an existing note
   Future<Either<Failure, Unit>> updateNote(
-      String userId,
-      NoteEntity note,
-      );
+    String userId,
+    NoteEntity note,
+  );
 
   /// Soft-deletes a note by moving it to the trash
   Future<Either<Failure, Unit>> deleteNote(
-      String userId,
-      String noteId,
-      );
+    String userId,
+    String noteId,
+  );
 
   /// Restores a deleted note from the trash
   Future<Either<Failure, Unit>> restoreNote(
-      String userId,
-      String noteId,
-      );
+    String userId,
+    String noteId,
+  );
 
   /// Permanently deletes a note from Firestore
   Future<Either<Failure, Unit>> deleteNotePermanently(
-      String userId,
-      String noteId,
-      );
+    String userId,
+    String noteId,
+  );
 
   /// Toggles the pin status of a note
   Future<Either<Failure, Unit>> togglePin(
-      String userId,
-      String noteId,
-      bool newPinValue,
-      );
+    String userId,
+    String noteId,
+    bool newPinValue,
+  );
 
   /// Toggles the archive status of a note
   Future<Either<Failure, Unit>> toggleArchive(
-      String userId,
-      String noteId,
-      bool newArchiveValue,
-      );
+    String userId,
+    String noteId,
+    bool newArchiveValue,
+  );
 
 // Optional future methods (can be added later):
 // Future<Either<Failure, NoteEntity>> getNoteById(String userId, String noteId);

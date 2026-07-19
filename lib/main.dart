@@ -1,6 +1,5 @@
 // lib/main.dart
 
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +64,7 @@ class MoNoteProApp extends ConsumerWidget {
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF000000),
+          seedColor: const Color(0xFF29B1F4), // Modern Green
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -84,6 +83,7 @@ class MoNoteProApp extends ConsumerWidget {
     );
   }
 }
+
 /// يقرر الشاشة بناءً على حالة المصادقة
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -122,8 +122,8 @@ class AuthWrapper extends ConsumerWidget {
               Text(
                 'Authentication Error',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.red,
-                ),
+                      color: Colors.red,
+                    ),
               ),
               const SizedBox(height: 8),
               Padding(
@@ -219,7 +219,10 @@ class SplashScreen extends StatelessWidget {
                       'Developed by',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant
+                            .withOpacity(0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),

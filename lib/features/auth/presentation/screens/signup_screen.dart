@@ -44,8 +44,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
-  bool get _isFormValid =>
-      Formz.validate([_fullName, _email, _password]);
+  bool get _isFormValid => Formz.validate([_fullName, _email, _password]);
 
   Future<void> _handleRegister() async {
     // Mark all fields dirty to trigger validation
@@ -65,7 +64,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       fullName: _fullNameController.text.trim(),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +87,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 _buildForm(context, authState),
 
                 const SizedBox(height: 32),
-
 
                 const SizedBox(height: 32),
 
@@ -131,15 +128,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         Text(
           'Create Account',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
         Text(
           'Join ${AppConstants.appName} and start organizing',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );
@@ -196,8 +193,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           Text(
             'Must be at least 6 characters',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 32),
           SizedBox(
@@ -212,17 +209,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
               child: authState.isLoading
                   ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Colors.white,
-                ),
-              )
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text(
-                'Create Account',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+                      'Create Account',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
         ],
@@ -237,8 +235,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         Text(
           "Already have an account? ",
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
         TextButton(
           onPressed: widget.onNavigateToLogin,

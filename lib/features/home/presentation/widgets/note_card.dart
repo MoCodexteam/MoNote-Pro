@@ -29,6 +29,11 @@ class NoteCard extends StatelessWidget {
     this.onDelete,
   });
 
+  TextDirection _getDirection(String text) {
+    final hasArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(text);
+    return hasArabic ? TextDirection.rtl : TextDirection.ltr;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -94,6 +99,7 @@ class NoteCard extends StatelessWidget {
                                 note.title.isEmpty ? 'Untitled' : note.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                textDirection: _getDirection(note.title),
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -109,7 +115,9 @@ class NoteCard extends StatelessWidget {
                                   fill: 1.0, // filled pin
                                 ),
                               ),
-                            if (onArchive != null || onPin != null || onDelete != null)
+                            if (onArchive != null ||
+                                onPin != null ||
+                                onDelete != null)
                               PopupMenuButton<String>(
                                 icon: Icon(
                                   Icons.more_vert,
@@ -121,7 +129,8 @@ class NoteCard extends StatelessWidget {
                                     onArchive!();
                                   } else if (value == 'pin' && onPin != null) {
                                     onPin!();
-                                  } else if (value == 'delete' && onDelete != null) {
+                                  } else if (value == 'delete' &&
+                                      onDelete != null) {
                                     onDelete!();
                                   }
                                 },
@@ -132,7 +141,9 @@ class NoteCard extends StatelessWidget {
                                       child: Row(
                                         children: [
                                           Icon(
-                                            note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                                            note.isPinned
+                                                ? Icons.push_pin
+                                                : Icons.push_pin_outlined,
                                             size: 18,
                                           ),
                                           const SizedBox(width: 8),
@@ -146,11 +157,15 @@ class NoteCard extends StatelessWidget {
                                       child: Row(
                                         children: [
                                           Icon(
-                                            note.isArchived ? Icons.unarchive : Icons.archive,
+                                            note.isArchived
+                                                ? Icons.unarchive
+                                                : Icons.archive,
                                             size: 18,
                                           ),
                                           const SizedBox(width: 8),
-                                          Text(note.isArchived ? 'Unarchive' : 'Archive'),
+                                          Text(note.isArchived
+                                              ? 'Unarchive'
+                                              : 'Archive'),
                                         ],
                                       ),
                                     ),
@@ -162,12 +177,17 @@ class NoteCard extends StatelessWidget {
                                           Icon(
                                             Icons.delete_outline,
                                             size: 18,
-                                            color: Theme.of(context).colorScheme.error,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error,
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
                                             'Delete',
-                                            style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error),
                                           ),
                                         ],
                                       ),
@@ -186,6 +206,7 @@ class NoteCard extends StatelessWidget {
                               : note.content,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
+                          textDirection: _getDirection(note.content),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                             height: 1.4,
@@ -224,12 +245,14 @@ class NoteCard extends StatelessWidget {
                             Text(
                               timeAgo,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                                color: colorScheme.onSurfaceVariant
+                                    .withOpacity(0.8),
                               ),
                             ),
 
                             // Category chip
-                            if (note.category != null && note.category!.isNotEmpty)
+                            if (note.category != null &&
+                                note.category!.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -252,7 +275,8 @@ class NoteCard extends StatelessWidget {
                               Text(
                                 '${note.tags.length} ${note.tags.length == 1 ? "tag" : "tags"}',
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                                  color: colorScheme.onSurfaceVariant
+                                      .withOpacity(0.8),
                                 ),
                               ),
                           ],

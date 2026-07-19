@@ -65,5 +65,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'monote-pro-c8353.firebasestorage.app',
     iosBundleId: 'com.mocodex.monotepro',
   );
-
 }

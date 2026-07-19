@@ -38,7 +38,10 @@ class NotificationsScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Text(
                     'Notifications',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   if (notifications.isNotEmpty)
@@ -68,21 +71,31 @@ class NotificationsScreen extends ConsumerWidget {
                               Icon(
                                 Icons.notifications_outlined,
                                 size: 64,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'No notifications yet',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Your reminders and notifications will appear here',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -93,36 +106,53 @@ class NotificationsScreen extends ConsumerWidget {
                           itemCount: notifications.length,
                           itemBuilder: (context, index) {
                             final notification = notifications[index];
-                            final isPast = notification.scheduledDate.isBefore(DateTime.now());
-                            
+                            final isPast = notification.scheduledDate
+                                .isBefore(DateTime.now());
+
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
                               elevation: notification.isRead ? 0 : 2,
-                              color: notification.isRead 
-                                  ? null 
-                                  : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                              color: notification.isRead
+                                  ? null
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withOpacity(0.3),
                               child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                                 leading: Container(
                                   width: 48,
                                   height: 48,
                                   decoration: BoxDecoration(
                                     color: isPast
-                                        ? Theme.of(context).colorScheme.errorContainer
-                                        : Theme.of(context).colorScheme.primaryContainer,
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .errorContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .primaryContainer,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    isPast ? Icons.event_busy : Icons.notification_important,
+                                    isPast
+                                        ? Icons.event_busy
+                                        : Icons.notification_important,
                                     color: isPast
-                                        ? Theme.of(context).colorScheme.onErrorContainer
-                                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onErrorContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
                                   ),
                                 ),
                                 title: Text(
                                   notification.title,
                                   style: TextStyle(
-                                    fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                                    fontWeight: notification.isRead
+                                        ? FontWeight.normal
+                                        : FontWeight.bold,
                                   ),
                                 ),
                                 subtitle: Column(
@@ -140,16 +170,23 @@ class NotificationsScreen extends ConsumerWidget {
                                         Icon(
                                           Icons.access_time,
                                           size: 14,
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          _formatDateTime(notification.scheduledDate),
+                                          _formatDateTime(
+                                              notification.scheduledDate),
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: isPast
-                                                ? Theme.of(context).colorScheme.error
-                                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .error
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -159,7 +196,8 @@ class NotificationsScreen extends ConsumerWidget {
                                 trailing: IconButton(
                                   icon: const Icon(Icons.close, size: 20),
                                   onPressed: () async {
-                                    await notifier.removeNotification(notification.id);
+                                    await notifier
+                                        .removeNotification(notification.id);
                                   },
                                 ),
                                 onTap: () async {
@@ -181,7 +219,7 @@ class NotificationsScreen extends ConsumerWidget {
   String _formatDateTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = dateTime.difference(now);
-    
+
     if (difference.isNegative) {
       final pastDifference = now.difference(dateTime);
       if (pastDifference.inDays > 0) {

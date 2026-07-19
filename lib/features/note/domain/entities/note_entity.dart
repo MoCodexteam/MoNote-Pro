@@ -33,24 +33,25 @@ class NoteChecklistItem extends Equatable {
 /// Pure domain entity for a Note in MoNote Pro
 /// No Firebase/JSON dependencies here – clean and testable
 class NoteEntity extends Equatable {
-  final String id;              // document ID
+  final String id; // document ID
   final String title;
   final String content;
-  final DateTime dateCreated;   // تاريخ الإنشاء
+  final DateTime dateCreated; // تاريخ الإنشاء
   final String? category;
   final List<String> tags;
   final bool isPinned;
   final bool isArchived;
   final bool isDeleted;
   final DateTime? deletedAt;
-  final DateTime lastEdit;      // آخر تعديل
-  final Color? categoryColor;   // للـ UI فقط (اختياري – يمكن تخزينه كـ hex string)
+  final DateTime lastEdit; // آخر تعديل
+  final Color?
+      categoryColor; // للـ UI فقط (اختياري – يمكن تخزينه كـ hex string)
   final List<NoteChecklistItem> checklistItems;
-  
+
   // Notification fields
-  final bool reminderEnabled;   // تفعيل التذكير
+  final bool reminderEnabled; // تفعيل التذكير
   final DateTime? reminderDate; // تاريخ التذكير
-  final int? reminderInterval;  // فترة التكرار بالأيام (مثلاً 3 = كل 3 أيام)
+  final int? reminderInterval; // فترة التكرار بالأيام (مثلاً 3 = كل 3 أيام)
 
   const NoteEntity({
     required this.id,
@@ -112,21 +113,21 @@ class NoteEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    title,
-    content,
-    dateCreated,
-    lastEdit,
-    tags,
-    category,
-    categoryColor,
-    isPinned,
-    isArchived,
-    isDeleted,
-    deletedAt,
-    checklistItems,
-    reminderEnabled,
-    reminderDate,
-    reminderInterval,
-  ];
+        id,
+        title,
+        content,
+        dateCreated,
+        lastEdit,
+        tags,
+        category,
+        categoryColor,
+        isPinned,
+        isArchived,
+        isDeleted,
+        deletedAt,
+        checklistItems,
+        reminderEnabled,
+        reminderDate,
+        reminderInterval,
+      ];
 }

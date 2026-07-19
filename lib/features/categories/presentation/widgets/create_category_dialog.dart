@@ -14,7 +14,8 @@ class CreateCategoryDialog extends ConsumerStatefulWidget {
   const CreateCategoryDialog({super.key});
 
   @override
-  ConsumerState<CreateCategoryDialog> createState() => _CreateCategoryDialogState();
+  ConsumerState<CreateCategoryDialog> createState() =>
+      _CreateCategoryDialogState();
 }
 
 class _CreateCategoryDialogState extends ConsumerState<CreateCategoryDialog> {
@@ -29,7 +30,7 @@ class _CreateCategoryDialogState extends ConsumerState<CreateCategoryDialog> {
 
   Future<void> _createCategory() async {
     final name = _nameController.text.trim();
-    
+
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -46,7 +47,7 @@ class _CreateCategoryDialogState extends ConsumerState<CreateCategoryDialog> {
         authenticated: (user) => user.uid,
         orElse: () => null,
       );
-      
+
       if (userId == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

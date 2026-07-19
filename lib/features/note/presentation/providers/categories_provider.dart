@@ -73,7 +73,8 @@ final defaultCategoriesProvider = Provider<List<CategoryEntity>>((ref) {
 // Stream of user's categories (real-time from Firestore)
 // ────────────────────────────────────────────────
 
-final categoriesStreamProvider = StreamProvider.autoDispose<List<CategoryEntity>>((ref) {
+final categoriesStreamProvider =
+    StreamProvider.autoDispose<List<CategoryEntity>>((ref) {
   final userId = ref.watch(currentUserIdProvider);
 
   if (userId == null) {
@@ -105,10 +106,10 @@ final enrichedCategoriesProvider = Provider<List<CategoryEntity>>((ref) {
   final stats = ref.watch(categoryStatsProvider);
 
   final userCategories = userCategoriesAsync.value ?? [];
-  
+
   // Combine default categories with user's custom categories
   final allCategories = [...defaultCategories, ...userCategories];
-  
+
   // Add note counts to each category
   return allCategories.map((cat) {
     final count = stats[cat.name] ?? 0;
@@ -120,17 +121,19 @@ final enrichedCategoriesProvider = Provider<List<CategoryEntity>>((ref) {
 final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for filtered notes by category
-final categoryFilteredNotesProvider = Provider<AsyncValue<List<NoteEntity>>>((ref) {
+final categoryFilteredNotesProvider =
+    Provider<AsyncValue<List<NoteEntity>>>((ref) {
   final notesAsync = ref.watch(notesStreamProvider);
   final selectedCategory = ref.watch(selectedCategoryProvider);
-  
+
   return notesAsync.when(
     data: (notes) {
       if (selectedCategory == null || selectedCategory.isEmpty) {
         return AsyncValue.data(notes);
       }
-      
-      final filteredNotes = notes.where((note) => note.category == selectedCategory).toList();
+
+      final filteredNotes =
+          notes.where((note) => note.category == selectedCategory).toList();
       return AsyncValue.data(filteredNotes);
     },
     loading: () => const AsyncValue.loading(),

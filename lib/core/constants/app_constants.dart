@@ -8,7 +8,8 @@ class AppConstants {
   // ────────────────────────────────────────────────
   static const String appName = 'MoNote Pro';
   static const String appVersion = '2.1.0';
-  static const String appDescription = 'تطبيق تدوين الملاحظات الذكي مع المزامنة السحابية';
+  static const String appDescription =
+      'تطبيق تدوين الملاحظات الذكي مع المزامنة السحابية';
   static const String developerTeam = 'MoCodex';
 
   // ────────────────────────────────────────────────
@@ -81,10 +82,13 @@ class AppConstants {
   // ────────────────────────────────────────────────
   // Error & Message Strings
   // ────────────────────────────────────────────────
-  static const String defaultErrorMessage = 'حدث خطأ غير متوقع، حاول مرة أخرى لاحقًا';
+  static const String defaultErrorMessage =
+      'حدث خطأ غير متوقع، حاول مرة أخرى لاحقًا';
   static const String noInternetMessage = 'لا يوجد اتصال بالإنترنت';
-  static const String sessionExpiredMessage = 'انتهت الجلسة، يرجى تسجيل الدخول مجدداً';
-  static const String weakPasswordMessage = 'كلمة المرور ضعيفة جدًا، يجب أن تحتوي على 6 أحرف على الأقل';
+  static const String sessionExpiredMessage =
+      'انتهت الجلسة، يرجى تسجيل الدخول مجدداً';
+  static const String weakPasswordMessage =
+      'كلمة المرور ضعيفة جدًا، يجب أن تحتوي على 6 أحرف على الأقل';
   static const String emailAlreadyInUse = 'البريد الإلكتروني مستخدم بالفعل';
   static const String noteFieldCategoryColor = 'categoryColor';
 }

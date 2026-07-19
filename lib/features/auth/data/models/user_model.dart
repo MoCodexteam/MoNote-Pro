@@ -28,7 +28,8 @@ class UserModel extends UserEntity {
       fullName: json[AppConstants.userFieldFullName] as String?,
       imageUrl: json[AppConstants.userFieldImageUrl] as String?,
       token: json[AppConstants.userFieldToken] as String?,
-      createdAt: (json[AppConstants.userFieldCreatedAt] as Timestamp?)?.toDate(),
+      createdAt:
+          (json[AppConstants.userFieldCreatedAt] as Timestamp?)?.toDate(),
     );
   }
 
@@ -48,11 +49,11 @@ class UserModel extends UserEntity {
 
   /// Factory to create from Firebase User + additional profile data
   factory UserModel.fromFirebaseUser(
-      User firebaseUser, {
-        String? fullName,
-        String? imageUrl,
-        String? token,
-      }) {
+    User firebaseUser, {
+    String? fullName,
+    String? imageUrl,
+    String? token,
+  }) {
     return UserModel(
       uid: firebaseUser.uid,
       email: firebaseUser.email ?? '',

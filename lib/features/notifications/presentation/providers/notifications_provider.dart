@@ -42,7 +42,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final notificationsJson = prefs.getString(_storageKey);
-      
+
       if (notificationsJson != null) {
         final List<dynamic> decoded = json.decode(notificationsJson);
         final notifications = decoded
@@ -56,10 +56,11 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
                   createdAt: DateTime.parse(json['createdAt']),
                 ))
             .toList();
-        
+
         // Sort by scheduled date (nearest first)
-        notifications.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-        
+        notifications
+            .sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+
         state = state.copyWith(notifications: notifications, isLoading: false);
       } else {
         state = state.copyWith(isLoading: false);
@@ -76,15 +77,17 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final notificationsJson = json.encode(
-        state.notifications.map((n) => {
-          'id': n.id,
-          'title': n.title,
-          'body': n.body,
-          'scheduledDate': n.scheduledDate.toIso8601String(),
-          'noteId': n.noteId,
-          'isRead': n.isRead,
-          'createdAt': n.createdAt.toIso8601String(),
-        }).toList(),
+        state.notifications
+            .map((n) => {
+                  'id': n.id,
+                  'title': n.title,
+                  'body': n.body,
+                  'scheduledDate': n.scheduledDate.toIso8601String(),
+                  'noteId': n.noteId,
+                  'isRead': n.isRead,
+                  'createdAt': n.createdAt.toIso8601String(),
+                })
+            .toList(),
       );
       await prefs.setString(_storageKey, notificationsJson);
     } catch (e) {
@@ -108,14 +111,16 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     );
 
     final updatedNotifications = [...state.notifications, notification];
-    updatedNotifications.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-    
+    updatedNotifications
+        .sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+
     state = state.copyWith(notifications: updatedNotifications);
     await _saveNotifications();
   }
 
   Future<void> removeNotification(String id) async {
-    final updatedNotifications = state.notifications.where((n) => n.id != id).toList();
+    final updatedNotifications =
+        state.notifications.where((n) => n.id != id).toList();
     state = state.copyWith(notifications: updatedNotifications);
     await _saveNotifications();
   }
@@ -132,7 +137,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   Future<void> markAllAsRead() async {
-    final updatedNotifications = state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+    final updatedNotifications =
+        state.notifications.map((n) => n.copyWith(isRead: true)).toList();
     state = state.copyWith(notifications: updatedNotifications);
     await _saveNotifications();
   }
@@ -144,12 +150,14 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
   // Remove notifications for a specific note (when note is deleted)
   Future<void> removeNotificationsForNote(String noteId) async {
-    final updatedNotifications = state.notifications.where((n) => n.noteId != noteId).toList();
+    final updatedNotifications =
+        state.notifications.where((n) => n.noteId != noteId).toList();
     state = state.copyWith(notifications: updatedNotifications);
     await _saveNotifications();
   }
 }
 
-final notificationsProvider = StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
+final notificationsProvider =
+    StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
   return NotificationsNotifier();
 });

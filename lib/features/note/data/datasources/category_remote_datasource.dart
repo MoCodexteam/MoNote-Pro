@@ -35,7 +35,9 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
         .orderBy('name', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => CategoryModel.fromFirestore(doc.data(), doc.id)).toList();
+      return snapshot.docs
+          .map((doc) => CategoryModel.fromFirestore(doc.data(), doc.id))
+          .toList();
     });
   }
 

@@ -31,7 +31,8 @@ final currentUserIdProvider = Provider<String?>((ref) {
 // Stream of user's notes (real-time from Firestore)
 // ────────────────────────────────────────────────
 
-final allNotesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
+final allNotesStreamProvider =
+    StreamProvider.autoDispose<List<NoteEntity>>((ref) {
   final userId = ref.watch(currentUserIdProvider);
 
   if (userId == null) {
@@ -47,7 +48,8 @@ final notesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
   final notesAsync = ref.watch(allNotesStreamProvider);
 
   return notesAsync.when(
-    data: (notes) => Stream.value(notes.where((note) => !note.isDeleted).toList()),
+    data: (notes) =>
+        Stream.value(notes.where((note) => !note.isDeleted).toList()),
     loading: () => Stream.value(<NoteEntity>[]),
     error: (_, __) => Stream.value(<NoteEntity>[]),
   );
@@ -57,7 +59,8 @@ final notesStreamProvider = StreamProvider.autoDispose<List<NoteEntity>>((ref) {
 // Filtered notes (search + pinned/regular separation)
 // ────────────────────────────────────────────────
 
-final filteredNotesProvider = Provider.autoDispose.family<List<NoteEntity>, String>((ref, searchQuery) {
+final filteredNotesProvider =
+    Provider.autoDispose.family<List<NoteEntity>, String>((ref, searchQuery) {
   final notesAsync = ref.watch(notesStreamProvider);
 
   return notesAsync.when(

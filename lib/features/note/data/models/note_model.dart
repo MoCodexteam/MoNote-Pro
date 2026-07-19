@@ -37,21 +37,30 @@ class NoteModel extends NoteEntity {
       id: doc.id,
       title: data[AppConstants.noteFieldTitle] as String? ?? 'Untitled',
       content: data[AppConstants.noteFieldContent] as String? ?? '',
-      dateCreated: (data[AppConstants.noteFieldDateCreated] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastEdit: (data[AppConstants.noteFieldLastEdit] as Timestamp?)?.toDate() ?? DateTime.now(),
+      dateCreated:
+          (data[AppConstants.noteFieldDateCreated] as Timestamp?)?.toDate() ??
+              DateTime.now(),
+      lastEdit:
+          (data[AppConstants.noteFieldLastEdit] as Timestamp?)?.toDate() ??
+              DateTime.now(),
       tags: List<String>.from(data[AppConstants.noteFieldTags] ?? []),
       category: data[AppConstants.noteFieldCategory] as String?,
       // If categoryColor is stored as hex string, parse it here (optional)
       categoryColor: data[AppConstants.noteFieldCategoryColor] != null
-          ? Color(int.parse(data[AppConstants.noteFieldCategoryColor] as String, radix: 16))
+          ? Color(int.parse(data[AppConstants.noteFieldCategoryColor] as String,
+              radix: 16))
           : null,
       isPinned: data[AppConstants.noteFieldPin] as bool? ?? false,
       isArchived: data[AppConstants.noteFieldArchive] as bool? ?? false,
       isDeleted: data[AppConstants.noteFieldDeleted] as bool? ?? false,
-      deletedAt: (data[AppConstants.noteFieldDeletedAt] as Timestamp?)?.toDate(),
-      checklistItems: _parseChecklistItems(data[AppConstants.noteFieldChecklistItems]),
-      reminderEnabled: data[AppConstants.noteFieldReminderEnabled] as bool? ?? false,
-      reminderDate: (data[AppConstants.noteFieldReminderDate] as Timestamp?)?.toDate(),
+      deletedAt:
+          (data[AppConstants.noteFieldDeletedAt] as Timestamp?)?.toDate(),
+      checklistItems:
+          _parseChecklistItems(data[AppConstants.noteFieldChecklistItems]),
+      reminderEnabled:
+          data[AppConstants.noteFieldReminderEnabled] as bool? ?? false,
+      reminderDate:
+          (data[AppConstants.noteFieldReminderDate] as Timestamp?)?.toDate(),
       reminderInterval: data[AppConstants.noteFieldReminderInterval] as int?,
     );
   }
@@ -59,18 +68,21 @@ class NoteModel extends NoteEntity {
   static List<NoteChecklistItem> _parseChecklistItems(Object? value) {
     if (value is! List) return const [];
 
-    return value.map((item) {
-      if (item is! Map) {
-        return const NoteChecklistItem(id: '', text: '');
-      }
+    return value
+        .map((item) {
+          if (item is! Map) {
+            return const NoteChecklistItem(id: '', text: '');
+          }
 
-      final map = Map<String, dynamic>.from(item);
-      return NoteChecklistItem(
-        id: map['id']?.toString() ?? '',
-        text: map['text']?.toString() ?? '',
-        isCompleted: map['isCompleted'] as bool? ?? false,
-      );
-    }).where((item) => item.text.isNotEmpty || item.id.isNotEmpty).toList();
+          final map = Map<String, dynamic>.from(item);
+          return NoteChecklistItem(
+            id: map['id']?.toString() ?? '',
+            text: map['text']?.toString() ?? '',
+            isCompleted: map['isCompleted'] as bool? ?? false,
+          );
+        })
+        .where((item) => item.text.isNotEmpty || item.id.isNotEmpty)
+        .toList();
   }
 
   /// Converts the model back to a Firestore-compatible map
@@ -83,21 +95,25 @@ class NoteModel extends NoteEntity {
       AppConstants.noteFieldTags: tags,
       if (category != null) AppConstants.noteFieldCategory: category,
       if (categoryColor != null)
-        AppConstants.noteFieldCategoryColor: categoryColor!.toARGB32().toRadixString(16).padLeft(8, '0'),
+        AppConstants.noteFieldCategoryColor:
+            categoryColor!.toARGB32().toRadixString(16).padLeft(8, '0'),
       AppConstants.noteFieldPin: isPinned,
       AppConstants.noteFieldArchive: isArchived,
       AppConstants.noteFieldDeleted: isDeleted,
-      AppConstants.noteFieldDeletedAt: deletedAt != null ? Timestamp.fromDate(deletedAt!) : null,
+      AppConstants.noteFieldDeletedAt:
+          deletedAt != null ? Timestamp.fromDate(deletedAt!) : null,
       AppConstants.noteFieldChecklistItems: checklistItems
           .map((item) => {
-            'id': item.id,
-            'text': item.text,
-            'isCompleted': item.isCompleted,
-          })
+                'id': item.id,
+                'text': item.text,
+                'isCompleted': item.isCompleted,
+              })
           .toList(),
       AppConstants.noteFieldReminderEnabled: reminderEnabled,
-      if (reminderDate != null) AppConstants.noteFieldReminderDate: Timestamp.fromDate(reminderDate!),
-      if (reminderInterval != null) AppConstants.noteFieldReminderInterval: reminderInterval,
+      if (reminderDate != null)
+        AppConstants.noteFieldReminderDate: Timestamp.fromDate(reminderDate!),
+      if (reminderInterval != null)
+        AppConstants.noteFieldReminderInterval: reminderInterval,
     };
   }
 

@@ -61,7 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
@@ -84,7 +83,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 _buildForm(context, authState),
 
                 const SizedBox(height: 32),
-
 
                 const SizedBox(height: 32),
 
@@ -126,15 +124,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Text(
           'Welcome back',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
         Text(
           'Sign in to continue to ${AppConstants.appName}',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );
@@ -208,23 +206,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               child: authState.isLoading
                   ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Colors.white,
-                ),
-              )
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text(
-                'Sign In',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+                      'Sign In',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
         ],
       ),
     );
   }
+
   Widget _buildRegisterLink(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -232,8 +232,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Text(
           "Don't have an account? ",
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
         TextButton(
           onPressed: widget.onNavigateToRegister,

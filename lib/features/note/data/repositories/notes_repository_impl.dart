@@ -23,11 +23,12 @@ class NotesRepositoryImpl implements NotesRepository {
   Stream<List<NoteEntity>> getUserNotesStream(String userId) {
     return _remoteDataSource.getUserNotesStream(userId).map(
           (models) => models.map((m) => m.toEntity()).toList(),
-    );
+        );
   }
 
   @override
-  Future<Either<Failure, Unit>> createNote(String userId, NoteEntity note) async {
+  Future<Either<Failure, Unit>> createNote(
+      String userId, NoteEntity note) async {
     try {
       final model = NoteModel(
         id: note.id,
@@ -49,14 +50,16 @@ class NotesRepositoryImpl implements NotesRepository {
       await _remoteDataSource.createNote(userId, model);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during note creation'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during note creation'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> updateNote(String userId, NoteEntity note) async {
+  Future<Either<Failure, Unit>> updateNote(
+      String userId, NoteEntity note) async {
     try {
       final model = NoteModel(
         id: note.id,
@@ -78,7 +81,8 @@ class NotesRepositoryImpl implements NotesRepository {
       await _remoteDataSource.updateNote(userId, model);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during note update'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during note update'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
@@ -90,55 +94,64 @@ class NotesRepositoryImpl implements NotesRepository {
       await _remoteDataSource.deleteNote(userId, noteId);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during note deletion'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during note deletion'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> restoreNote(String userId, String noteId) async {
+  Future<Either<Failure, Unit>> restoreNote(
+      String userId, String noteId) async {
     try {
       await _remoteDataSource.restoreNote(userId, noteId);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during note restoration'));
+      return Left(ServerFailure(
+          e.message ?? 'Firestore error during note restoration'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteNotePermanently(String userId, String noteId) async {
+  Future<Either<Failure, Unit>> deleteNotePermanently(
+      String userId, String noteId) async {
     try {
       await _remoteDataSource.deleteNotePermanently(userId, noteId);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during permanent note deletion'));
+      return Left(ServerFailure(
+          e.message ?? 'Firestore error during permanent note deletion'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> togglePin(String userId, String noteId, bool newPinValue) async {
+  Future<Either<Failure, Unit>> togglePin(
+      String userId, String noteId, bool newPinValue) async {
     try {
       await _remoteDataSource.togglePin(userId, noteId, newPinValue);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during pin toggle'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during pin toggle'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> toggleArchive(String userId, String noteId, bool newArchiveValue) async {
+  Future<Either<Failure, Unit>> toggleArchive(
+      String userId, String noteId, bool newArchiveValue) async {
     try {
       await _remoteDataSource.toggleArchive(userId, noteId, newArchiveValue);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during archive toggle'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during archive toggle'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }

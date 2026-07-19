@@ -69,7 +69,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               child: notesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Center(
-                  child: Text('Error loading notes: $err', style: const TextStyle(color: Colors.red)),
+                  child: Text('Error loading notes: $err',
+                      style: const TextStyle(color: Colors.red)),
                 ),
                 data: (allNotes) {
                   // تصفية + ترتيب الملاحظات
@@ -79,17 +80,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   return filtered.isEmpty
                       ? _buildEmptyState(context)
                       : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final note = filtered[index];
-                      return SearchResultCard(
-                        note: note,
-                        searchQuery: _searchQuery,
-                        onTap: () => _onViewNote(note),
-                      );
-                    },
-                  );
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final note = filtered[index];
+                            return SearchResultCard(
+                              note: note,
+                              searchQuery: _searchQuery,
+                              onTap: () => _onViewNote(note),
+                            );
+                          },
+                        );
                 },
               ),
             ),
@@ -123,7 +124,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 hintText: 'Search notes, tags...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -136,7 +138,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: _showFilters ? Theme.of(context).colorScheme.primary : null,
+              color:
+                  _showFilters ? Theme.of(context).colorScheme.primary : null,
             ),
             onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
@@ -191,18 +194,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           DropdownButtonFormField<FilterOption>(
             initialValue: _filterBy,
             decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
             items: [
-              const DropdownMenuItem(value: FilterAll(), child: Text('All Notes')),
-              const DropdownMenuItem(value: FilterPinned(), child: Text('Pinned Only')),
+              const DropdownMenuItem(
+                  value: FilterAll(), child: Text('All Notes')),
+              const DropdownMenuItem(
+                  value: FilterPinned(), child: Text('Pinned Only')),
               ...ref.watch(enrichedCategoriesProvider).map(
                     (cat) => DropdownMenuItem(
-                  value: FilterCategory(cat.name),
-                  child: Text(cat.name),
-                ),
-              ),
+                      value: FilterCategory(cat.name),
+                      child: Text(cat.name),
+                    ),
+                  ),
             ],
             onChanged: (value) {
               if (value != null) setState(() => _filterBy = value);
@@ -218,7 +225,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       final matchesSearch = _searchQuery.isEmpty ||
           note.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           note.content.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          note.tags.any((tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
+          note.tags.any(
+              (tag) => tag.toLowerCase().contains(_searchQuery.toLowerCase()));
 
       if (_filterBy is FilterAll) return matchesSearch;
       if (_filterBy is FilterPinned) return matchesSearch && note.isPinned;
@@ -253,7 +261,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Icon(
             Icons.search_off,
             size: 80,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+            color:
+                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
           ),
           const SizedBox(height: 24),
           Text(
@@ -265,8 +274,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Text(
               'Try different keywords or adjust filters',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ],
@@ -338,7 +347,8 @@ class SearchResultCard extends StatelessWidget {
                 width: 4,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: note.categoryColor ?? Theme.of(context).colorScheme.primary,
+                  color: note.categoryColor ??
+                      Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -360,7 +370,8 @@ class SearchResultCard extends StatelessWidget {
                         if (note.isPinned)
                           const Padding(
                             padding: EdgeInsets.only(left: 8),
-                            child: Icon(Icons.push_pin, size: 18, color: Colors.blue),
+                            child: Icon(Icons.push_pin,
+                                size: 18, color: Colors.blue),
                           ),
                       ],
                     ),
@@ -384,24 +395,28 @@ class SearchResultCard extends StatelessWidget {
 
   // الدالة نفسها (مع context كـ أول parameter)
   Widget _highlightText(
-      BuildContext context,
-      String text,
-      String query, {
-        bool isTitle = false,
-        int? maxLines,
-      }) {
+    BuildContext context,
+    String text,
+    String query, {
+    bool isTitle = false,
+    int? maxLines,
+  }) {
     if (query.isEmpty) {
       return Text(
         text,
         maxLines: maxLines ?? 1,
         overflow: TextOverflow.ellipsis,
         style: isTitle
-            ? Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)
+            ? Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w600)
             : Theme.of(context).textTheme.bodyMedium,
       );
     }
 
-    final parts = text.split(RegExp('(${RegExp.escape(query)})', caseSensitive: false));
+    final parts =
+        text.split(RegExp('(${RegExp.escape(query)})', caseSensitive: false));
 
     return Text.rich(
       TextSpan(
@@ -411,9 +426,9 @@ class SearchResultCard extends StatelessWidget {
             text: part,
             style: match
                 ? TextStyle(
-              backgroundColor: Colors.yellow.withOpacity(0.4),
-              fontWeight: isTitle ? FontWeight.w600 : null,
-            )
+                    backgroundColor: Colors.yellow.withOpacity(0.4),
+                    fontWeight: isTitle ? FontWeight.w600 : null,
+                  )
                 : null,
           );
         }).toList(),

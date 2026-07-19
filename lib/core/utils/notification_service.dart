@@ -1,7 +1,8 @@
 // lib/core/utils/notification_service.dart
 
+import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -14,6 +15,10 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  // Stream for handling notification taps
+  static final StreamController<String?> onNotificationClick =
+      StreamController<String?>.broadcast();
+
   bool _initialized = false;
 
   Future<void> initialize() async {
@@ -24,7 +29,7 @@ class NotificationService {
 
     // Android initialization settings
     const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/monote');
 
     // iOS initialization settings
     const DarwinInitializationSettings iosSettings =
@@ -52,10 +57,10 @@ class NotificationService {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
           _notificationsPlugin.resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
-      
+
       if (androidImplementation != null) {
-        final bool? granted = await androidImplementation
-            .requestNotificationsPermission();
+        final bool? granted =
+            await androidImplementation.requestNotificationsPermission();
         debugPrint('Notification permission granted: $granted');
       }
     }
@@ -66,6 +71,9 @@ class NotificationService {
   void _onNotificationTap(NotificationResponse response) {
     debugPrint('Notification tapped: ${response.payload}');
     // Handle notification tap - navigate to note
+    if (response.payload != null) {
+      onNotificationClick.add(response.payload);
+    }
   }
 
   // Schedule a one-time notification
@@ -85,7 +93,7 @@ class NotificationService {
 
     final scheduledTZDateTime = tz.TZDateTime.from(scheduledDate, tz.local);
     debugPrint('Scheduling notification at: $scheduledTZDateTime (local time)');
-    
+
     try {
       await _notificationsPlugin.zonedSchedule(
         id,
@@ -100,6 +108,9 @@ class NotificationService {
             importance: Importance.high,
             priority: Priority.high,
             showWhen: true,
+            color: Color(0xFF6750A4), // Modern purple color
+            icon: '@mipmap/monote',
+            styleInformation: BigTextStyleInformation(''),
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,
@@ -133,7 +144,8 @@ class NotificationService {
     // Ensure the scheduled date is in the future
     final now = DateTime.now();
     if (startDate.isBefore(now)) {
-      debugPrint('Cannot schedule recurring notification in the past: $startDate');
+      debugPrint(
+          'Cannot schedule recurring notification in the past: $startDate');
       return;
     }
 
@@ -152,6 +164,9 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
           showWhen: true,
+          color: Color(0xFF6750A4), // Modern purple color
+          icon: '@mipmap/monote',
+          styleInformation: BigTextStyleInformation(''),
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
@@ -178,10 +193,12 @@ class NotificationService {
 
   // Get pending notifications
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    final notifications = await _notificationsPlugin.pendingNotificationRequests();
+    final notifications =
+        await _notificationsPlugin.pendingNotificationRequests();
     debugPrint('Pending notifications count: ${notifications.length}');
     for (var notification in notifications) {
-      debugPrint('Pending notification: ID=${notification.id}, Title=${notification.title}');
+      debugPrint(
+          'Pending notification: ID=${notification.id}, Title=${notification.title}');
     }
     return notifications;
   }

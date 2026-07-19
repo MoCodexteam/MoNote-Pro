@@ -46,8 +46,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               child: categories.isEmpty
                   ? _buildEmptyState(context)
                   : _isGridView
-                  ? _buildGridView(context, categories)
-                  : _buildListView(context, categories),
+                      ? _buildGridView(context, categories)
+                      : _buildListView(context, categories),
             ),
           ],
         ),
@@ -80,8 +80,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           Text(
             'Categories',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const Spacer(),
           IconButton(
@@ -127,7 +127,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   Widget _buildCategoryGridCard(BuildContext context, CategoryEntity category) {
     final isDefaultCategory = category.userId == 'system';
-    
+
     return GestureDetector(
       onTap: () => widget.onSelectCategory(category.name),
       child: AnimatedContainer(
@@ -150,40 +150,44 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         ),
         child: Stack(
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: category.color.withOpacity(0.25),
-                    shape: BoxShape.circle,
+            Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: category.color.withOpacity(0.25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.folder_outlined,
+                      size: 40,
+                      color: category.color,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.folder_outlined,
-                    size: 40,
-                    color: category.color,
+                  const SizedBox(height: 16),
+                  Text(
+                    category.name,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: category.color,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  category.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: category.color,
+                  const SizedBox(height: 8),
+                  Text(
+                    '${category.noteCount} ${category.noteCount == 1 ? "note" : "notes"}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${category.noteCount} ${category.noteCount == 1 ? "note" : "notes"}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                ],
+              ),
             ),
             if (!isDefaultCategory)
               Positioned(
@@ -222,7 +226,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   Widget _buildCategoryListCard(BuildContext context, CategoryEntity category) {
     final isDefaultCategory = category.userId == 'system';
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
@@ -255,15 +259,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     Text(
                       category.name,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${category.noteCount} ${category.noteCount == 1 ? "note" : "notes"}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -299,22 +304,25 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             Icon(
               Icons.category_outlined,
               size: 80,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withOpacity(0.6),
             ),
             const SizedBox(height: 24),
             Text(
               'No categories yet',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
             Text(
               'Categories will appear here once you start organizing your notes',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -352,7 +360,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             onPressed: () async {
               Navigator.of(context).pop();
               try {
-                await ref.read(categoryActionsProvider).deleteCategory(category.id);
+                await ref
+                    .read(categoryActionsProvider)
+                    .deleteCategory(category.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -365,7 +375,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to delete category: ${e.toString()}'),
+                      content:
+                          Text('Failed to delete category: ${e.toString()}'),
                       backgroundColor: Colors.red,
                     ),
                   );

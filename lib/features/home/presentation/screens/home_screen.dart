@@ -13,10 +13,14 @@ import '../../../home/presentation/widgets/note_card.dart';
 import '../../../categories/presentation/screens/categories_screen.dart';
 import '../../../search/presentation/screens/search_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
+import '../../../notifications/presentation/providers/notifications_provider.dart';
+import '../../../calendar/presentation/screens/calendar_screen.dart';
+import '../../../../core/utils/notification_service.dart';
+import 'dart:async';
 
 /// الشاشة الرئيسية بعد تسجيل الدخول
-/// تحتوي على Bottom Navigation Bar مع 4 تبويبات:
-/// Home (الملاحظات), Categories, Search, Profile
+/// تحتوي على Bottom Navigation Bar مع 5 تبويبات:
+/// Home (الملاحظات), Categories, Calendar, Search, Profile
 class HomeScreen extends ConsumerStatefulWidget {
   final UserEntity user;
 
@@ -31,18 +35,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  StreamSubscription<String?>? _notificationSubscription;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(() {
-      setState(() => _searchQuery = _searchController.text.trim());
+      final newText = _searchController.text.trim();
+      if (newText != _searchQuery) {
+        setState(() => _searchQuery = newText);
+      }
+    });
+
+    _notificationSubscription =
+        NotificationService.onNotificationClick.stream.listen((payload) {
+      if (payload != null && mounted) {
+        final notes = ref.read(notesStreamProvider).value;
+        if (notes != null) {
+          try {
+            final note = notes.firstWhere((n) => n.id == payload);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateEditNoteScreen(
+                  existingNote: note,
+                  onBack: () {},
+                ),
+              ),
+            );
+          } catch (e) {
+            debugPrint('Note with id $payload not found: $e');
+          }
+        }
+      }
     });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _notificationSubscription?.cancel();
     super.dispose();
   }
 
@@ -57,24 +89,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Tab 0: Home – الملاحظات
             _buildHomeTab(context),
 
-            // Tab 1: Categories (placeholder)
+            // Tab 1: Categories
             CategoriesScreen(
               onBack: () {
                 setState(() => _currentIndex = 0);
               },
               onSelectCategory: (categoryName) {
-                ref.read(selectedCategoryProvider.notifier).state = categoryName;
+                ref.read(selectedCategoryProvider.notifier).state =
+                    categoryName;
                 setState(() => _currentIndex = 0);
               },
             ),
 
-            // Tab 2: Search (placeholder)
+            // Tab 2: Calendar
+            CalendarScreen(
+              onBack: () {
+                setState(() => _currentIndex = 0);
+              },
+            ),
+
+            // Tab 3: Search
             SearchScreen(
               onBack: () {
                 setState(() => _currentIndex = 0);
               },
             ),
-            // Tab 3: Profile
+            // Tab 4: Profile
             ProfileScreen(
               onBack: () {
                 setState(() => _currentIndex = 0); // رجوع للـ Home
@@ -87,11 +127,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // FAB يظهر فقط في تبويب Home
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
-        onPressed: _onCreateNote,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        elevation: 6,
-        child: const Icon(Icons.add, size: 28),
-      )
+              onPressed: _onCreateNote,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              elevation: 6,
+              child: const Icon(Icons.add, size: 28),
+            )
           : null,
 
       // Bottom Navigation Bar مع تأثير gradient على التبويب النشط
@@ -104,7 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ────────────────────────────────────────────────
   Widget _buildHomeTab(BuildContext context) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final notesAsync = selectedCategory == null 
+    final notesAsync = selectedCategory == null
         ? ref.watch(notesStreamProvider)
         : ref.watch(categoryFilteredNotesProvider);
 
@@ -120,13 +160,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('حدث خطأ أثناء تحميل الملاحظات', style: Theme.of(context).textTheme.titleMedium),
+                  Text('حدث خطأ أثناء تحميل الملاحظات',
+                      style: Theme.of(context).textTheme.titleMedium),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
                     child: Text(
                       err.toString(),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.red),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Colors.red),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -140,12 +185,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             data: (notes) {
               // Filter out deleted notes first
-              final activeNotes = notes.where((note) => !note.isDeleted).toList();
-              
+              final activeNotes =
+                  notes.where((note) => !note.isDeleted).toList();
+
               // Apply search filter
               final filteredNotes = activeNotes.where((note) {
                 if (_searchQuery.isEmpty) return true;
-                
+
                 final query = _searchQuery.toLowerCase();
                 return note.title.toLowerCase().contains(query) ||
                     note.content.toLowerCase().contains(query) ||
@@ -153,78 +199,100 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     note.tags.any((tag) => tag.toLowerCase().contains(query));
               }).toList();
 
-              final pinnedNotes = filteredNotes.where((n) => n.isPinned).toList();
-              final regularNotes = filteredNotes.where((n) => !n.isPinned).toList();
+              final pinnedNotes =
+                  filteredNotes.where((n) => n.isPinned).toList();
+              final regularNotes =
+                  filteredNotes.where((n) => !n.isPinned).toList();
 
               return filteredNotes.isEmpty
                   ? EmptyState(onCreateNote: _onCreateNote)
                   : ListView(
-                padding: const EdgeInsets.all(24),
-                children: [
-                  if (selectedCategory != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.filter_list,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Filtered by: $selectedCategory',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      padding: const EdgeInsets.all(24),
+                      children: [
+                        if (selectedCategory != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.filter_list,
+                                  size: 20,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Filtered by: $selectedCategory',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.clear, size: 20),
+                                  onPressed: () {
+                                    ref
+                                        .read(selectedCategoryProvider.notifier)
+                                        .state = null;
+                                  },
+                                  tooltip: 'Clear filter',
+                                ),
+                              ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 20),
-                            onPressed: () {
-                              ref.read(selectedCategoryProvider.notifier).state = null;
-                            },
-                            tooltip: 'Clear filter',
-                          ),
                         ],
-                      ),
-                    ),
-                  ],
-                  if (pinnedNotes.isNotEmpty) ...[
-                    _buildSectionHeader(context, 'Pinned', Icons.push_pin),
-                    ...pinnedNotes.asMap().entries.map(
-                          (e) => NoteCard(
-                        note: e.value,
-                        index: e.key,
-                        onTap: () => _onViewNote(e.value),
-                        onPin: () => _onTogglePin(e.value),
-                        onDelete: () => _onDeleteNote(e.value),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                  if (regularNotes.isNotEmpty) ...[
-                    if (pinnedNotes.isNotEmpty)
-                      _buildSectionHeader(context, selectedCategory != null ? 'Notes in this category' : 'All Notes', null),
-                    ...regularNotes.asMap().entries.map(
-                          (e) => NoteCard(
-                        note: e.value,
-                        index: e.key + pinnedNotes.length,
-                        onTap: () => _onViewNote(e.value),
-                        onPin: () => _onTogglePin(e.value),
-                        onDelete: () => _onDeleteNote(e.value),
-                      ),
-                    ),
-                  ],
-                ],
-              );
+                        if (pinnedNotes.isNotEmpty) ...[
+                          _buildSectionHeader(
+                              context, 'Pinned', Icons.push_pin),
+                          ...pinnedNotes.asMap().entries.map(
+                                (e) => NoteCard(
+                                  note: e.value,
+                                  index: e.key,
+                                  onTap: () => _onViewNote(e.value),
+                                  onPin: () => _onTogglePin(e.value),
+                                  onArchive: () => _onToggleArchive(e.value),
+                                  onDelete: () => _onDeleteNote(e.value),
+                                ),
+                              ),
+                          const SizedBox(height: 32),
+                        ],
+                        if (regularNotes.isNotEmpty) ...[
+                          if (pinnedNotes.isNotEmpty)
+                            _buildSectionHeader(
+                                context,
+                                selectedCategory != null
+                                    ? 'Notes in this category'
+                                    : 'All Notes',
+                                null),
+                          ...regularNotes.asMap().entries.map(
+                                (e) => NoteCard(
+                                  note: e.value,
+                                  index: e.key + pinnedNotes.length,
+                                  onTap: () => _onViewNote(e.value),
+                                  onPin: () => _onTogglePin(e.value),
+                                  onArchive: () => _onToggleArchive(e.value),
+                                  onDelete: () => _onDeleteNote(e.value),
+                                ),
+                              ),
+                        ],
+                      ],
+                    );
             },
           ),
         ),
@@ -239,6 +307,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     const tabs = [
       {'icon': Icons.home, 'label': 'Home'},
       {'icon': Icons.folder_outlined, 'label': 'Categories'},
+      {'icon': Icons.calendar_today, 'label': 'Calendar'},
       {'icon': Icons.search, 'label': 'Search'},
       {'icon': Icons.person_outline, 'label': 'Profile'},
     ];
@@ -279,13 +348,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
-                    Theme.of(context).colorScheme.secondary.withValues(alpha: 0.25),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [
+                          Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.25),
+                          Theme.of(context)
+                              .colorScheme
+                              .secondary
+                              .withValues(alpha: 0.25),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -328,15 +403,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Text(
                     'MoNote Pro',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${ref.watch(notesStreamProvider).value?.length ?? 0} ${ref.watch(notesStreamProvider).value?.length == 1 ? "note" : "notes"}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
@@ -357,13 +432,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        Icons.notifications_outlined,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        size: 24,
+                      child: Stack(
+                        children: [
+                          Icon(
+                            Icons.notifications_outlined,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 24,
+                          ),
+                          if (ref
+                              .watch(notificationsProvider)
+                              .notifications
+                              .any((n) => !n.isRead))
+                            Positioned(
+                              right: 2,
+                              top: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -371,13 +468,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // Profile avatar
                   GestureDetector(
                     onTap: () {
-                      setState(() => _currentIndex = 3); // الانتقال لتبويب Profile
+                      setState(
+                          () => _currentIndex = 3); // الانتقال لتبويب Profile
                     },
                     child: CircleAvatar(
                       radius: 20,
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: Text(
-                        widget.user.fullName?.substring(0, 1).toUpperCase() ?? '?',
+                        widget.user.fullName?.substring(0, 1).toUpperCase() ??
+                            '?',
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),
@@ -409,7 +508,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ────────────────────────────────────────────────
   // رأس القسم (Pinned / All Notes)
   // ────────────────────────────────────────────────
-  Widget _buildSectionHeader(BuildContext context, String title, IconData? icon) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, IconData? icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -421,10 +521,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Text(
             title.toUpperCase(),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
         ],
       ),
@@ -466,6 +566,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final actions = ref.read(notesActionsProvider);
     actions.deleteNote(note.id);
   }
+
+  void _onToggleArchive(NoteEntity note) {
+    final actions = ref.read(notesActionsProvider);
+    actions.toggleArchive(note.id, note.isArchived);
+  }
 }
 
 /// حالة فارغة (Empty State)
@@ -499,24 +604,26 @@ class EmptyState extends StatelessWidget {
             Text(
               'No notes yet',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 12),
             Text(
               'Start organizing your thoughts by creating your first note',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
               icon: const Icon(Icons.add),
               label: const Text('Create Note'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: onCreateNote,
             ),

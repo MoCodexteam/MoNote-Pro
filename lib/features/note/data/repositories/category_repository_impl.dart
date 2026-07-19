@@ -21,11 +21,12 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Stream<List<CategoryEntity>> getUserCategoriesStream(String userId) {
     return _remoteDataSource.getUserCategoriesStream(userId).map(
           (models) => models.map((m) => m.toEntity()).toList(),
-    );
+        );
   }
 
   @override
-  Future<Either<Failure, Unit>> createCategory(String userId, CategoryEntity category) async {
+  Future<Either<Failure, Unit>> createCategory(
+      String userId, CategoryEntity category) async {
     try {
       final model = CategoryModel(
         id: category.id,
@@ -38,14 +39,16 @@ class CategoryRepositoryImpl implements CategoryRepository {
       await _remoteDataSource.createCategory(userId, model);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during category creation'));
+      return Left(ServerFailure(
+          e.message ?? 'Firestore error during category creation'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> updateCategory(String userId, CategoryEntity category) async {
+  Future<Either<Failure, Unit>> updateCategory(
+      String userId, CategoryEntity category) async {
     try {
       final model = CategoryModel(
         id: category.id,
@@ -58,19 +61,22 @@ class CategoryRepositoryImpl implements CategoryRepository {
       await _remoteDataSource.updateCategory(userId, model);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during category update'));
+      return Left(
+          ServerFailure(e.message ?? 'Firestore error during category update'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteCategory(String userId, String categoryId) async {
+  Future<Either<Failure, Unit>> deleteCategory(
+      String userId, String categoryId) async {
     try {
       await _remoteDataSource.deleteCategory(userId, categoryId);
       return const Right(unit);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure(e.message ?? 'Firestore error during category deletion'));
+      return Left(ServerFailure(
+          e.message ?? 'Firestore error during category deletion'));
     } catch (e) {
       return Left(ServerFailure('Unexpected error: $e'));
     }

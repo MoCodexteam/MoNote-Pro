@@ -7,6 +7,7 @@ import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
+import '../../domain/usecases/send_password_reset_email_usecase.dart';
 import '../providers/auth_state.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -18,6 +19,7 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
   late final SignInUseCase _signInUseCase;
   late final SignOutUseCase _signOutUseCase;
   late final GetCurrentUserUseCase _getCurrentUserUseCase;
+  late final SendPasswordResetEmailUseCase _sendPasswordResetEmailUseCase;
 
   @override
   AuthState build() {
@@ -26,6 +28,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     _signInUseCase = ref.read(signInUseCaseProvider);
     _signOutUseCase = ref.read(signOutUseCaseProvider);
     _getCurrentUserUseCase = ref.read(getCurrentUserUseCaseProvider);
+    _sendPasswordResetEmailUseCase =
+        ref.read(sendPasswordResetEmailUseCaseProvider);
 
     // Load current user immediately when provider is created
     _loadCurrentUser();
@@ -40,8 +44,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     final result = await _getCurrentUserUseCase();
 
     state = result.fold(
-          (failure) => AuthState.error(message: failure.message),
-          (user) => user != null
+      (failure) => AuthState.error(message: failure.message),
+      (user) => user != null
           ? AuthState.authenticated(user: user)
           : const AuthState.unauthenticated(),
     );
@@ -62,8 +66,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     );
 
     state = result.fold(
-          (failure) => AuthState.error(message: failure.message),
-          (user) => AuthState.authenticated(user: user),
+      (failure) => AuthState.error(message: failure.message),
+      (user) => AuthState.authenticated(user: user),
     );
   }
 
@@ -80,8 +84,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     );
 
     state = result.fold(
-          (failure) => AuthState.error(message: failure.message),
-          (user) => AuthState.authenticated(user: user),
+      (failure) => AuthState.error(message: failure.message),
+      (user) => AuthState.authenticated(user: user),
     );
   }
 
@@ -92,8 +96,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
     final result = await _signOutUseCase();
 
     state = result.fold(
-          (failure) => AuthState.error(message: failure.message),
-          (_) {
+      (failure) => AuthState.error(message: failure.message),
+      (_) {
         // After successful sign out → reload (should be unauthenticated)
         _loadCurrentUser();
         return const AuthState.unauthenticated();
@@ -102,12 +106,11 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      final authRemoteDataSource = AuthRemoteDataSourceImpl();
-      await authRemoteDataSource.sendPasswordResetEmail(email);
-    } catch (e) {
-      throw Exception('Failed to send password reset email: $e');
-    }
+    final result = await _sendPasswordResetEmailUseCase(email: email);
+    result.fold(
+      (failure) => throw Exception(failure.message),
+      (_) => null,
+    );
   }
 
   /// Manually refresh current user state
@@ -118,7 +121,8 @@ class AuthNotifier extends AutoDisposeNotifier<AuthState> {
 // Providers
 // ────────────────────────────────────────────────
 
-final authNotifierProvider = NotifierProvider.autoDispose<AuthNotifier, AuthState>(
+final authNotifierProvider =
+    NotifierProvider.autoDispose<AuthNotifier, AuthState>(
   AuthNotifier.new,
 );
 
@@ -127,19 +131,24 @@ final authNotifierProvider = NotifierProvider.autoDispose<AuthNotifier, AuthStat
 // ────────────────────────────────────────────────
 
 final signUpUseCaseProvider = Provider<SignUpUseCase>(
-      (ref) => SignUpUseCase(ref.read(authRepositoryProvider)),
+  (ref) => SignUpUseCase(ref.read(authRepositoryProvider)),
 );
 
 final signInUseCaseProvider = Provider<SignInUseCase>(
-      (ref) => SignInUseCase(ref.read(authRepositoryProvider)),
+  (ref) => SignInUseCase(ref.read(authRepositoryProvider)),
 );
 
 final signOutUseCaseProvider = Provider<SignOutUseCase>(
-      (ref) => SignOutUseCase(ref.read(authRepositoryProvider)),
+  (ref) => SignOutUseCase(ref.read(authRepositoryProvider)),
 );
 
 final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>(
-      (ref) => GetCurrentUserUseCase(ref.read(authRepositoryProvider)),
+  (ref) => GetCurrentUserUseCase(ref.read(authRepositoryProvider)),
+);
+
+final sendPasswordResetEmailUseCaseProvider =
+    Provider<SendPasswordResetEmailUseCase>(
+  (ref) => SendPasswordResetEmailUseCase(ref.read(authRepositoryProvider)),
 );
 
 // ────────────────────────────────────────────────
@@ -147,7 +156,7 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>(
 // ────────────────────────────────────────────────
 
 final authRepositoryProvider = Provider<AuthRepository>(
-      (ref) => AuthRepositoryImpl(
+  (ref) => AuthRepositoryImpl(
     remoteDataSource: AuthRemoteDataSourceImpl(),
   ),
 );

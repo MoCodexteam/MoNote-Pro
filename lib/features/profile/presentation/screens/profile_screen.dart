@@ -1,6 +1,5 @@
 // lib/features/profile/presentation/screens/profile_screen.dart
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,16 +39,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final notesAsync = ref.watch(allNotesStreamProvider);
     final notesCount = notesAsync.value?.where((n) => !n.isDeleted).length ?? 0;
-    final pinnedCount = notesAsync.value?.where((n) => !n.isDeleted && n.isPinned).length ?? 0;
-    final archivedCount = notesAsync.value?.where((n) => !n.isDeleted && n.isArchived).length ?? 0;
+    final pinnedCount =
+        notesAsync.value?.where((n) => !n.isDeleted && n.isPinned).length ?? 0;
+    final archivedCount =
+        notesAsync.value?.where((n) => !n.isDeleted && n.isArchived).length ??
+            0;
     final trashCount = notesAsync.value?.where((n) => n.isDeleted).length ?? 0;
 
     final categoriesCount = notesAsync.value
-        ?.where((n) => !n.isDeleted)
-        .map((n) => n.category)
-        .where((c) => c != null && c.isNotEmpty)
-        .toSet()
-        .length ??
+            ?.where((n) => !n.isDeleted)
+            .map((n) => n.category)
+            .where((c) => c != null && c.isNotEmpty)
+            .toSet()
+            .length ??
         0;
 
     return Scaffold(
@@ -63,7 +65,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // المحتوى الرئيسي
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -109,13 +112,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onSurface),
             onPressed: onBack,
           ),
           const SizedBox(width: 12),
           Text(
             'Profile & Settings',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -123,14 +130,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildUserInfoCard(
-      BuildContext context,
-      UserEntity? user,
-      int notesCount,
-      int pinnedCount,
-      int archivedCount,
-      int trashCount,
-      int categoriesCount,
-      ) {
+    BuildContext context,
+    UserEntity? user,
+    int notesCount,
+    int pinnedCount,
+    int archivedCount,
+    int trashCount,
+    int categoriesCount,
+  ) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -145,7 +152,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   child: Text(
                     user?.fullName?.substring(0, 1).toUpperCase() ?? '?',
-                    style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 32,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -155,17 +165,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Text(
                         user?.fullName ?? 'User',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.mail_outline, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          Icon(Icons.mail_outline,
+                              size: 16,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                           const SizedBox(width: 6),
-                          Text(
-                            user?.email ?? 'No email',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          Expanded(
+                            child: Text(
+                              user?.email ?? 'No email',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -179,17 +204,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatItem(context, Icons.note_alt_outlined, Colors.blue, notesCount, 'Notes'),
-                _buildStatItem(context, Icons.folder_outlined, Colors.teal, categoriesCount, 'Categories'),
-                _buildStatItem(context, Icons.push_pin_outlined, Colors.purple, pinnedCount, 'Pinned'),
+                _buildStatItem(context, Icons.note_alt_outlined, Colors.blue,
+                    notesCount, 'Notes'),
+                _buildStatItem(context, Icons.folder_outlined, Colors.teal,
+                    categoriesCount, 'Categories'),
+                _buildStatItem(context, Icons.push_pin_outlined, Colors.purple,
+                    pinnedCount, 'Pinned'),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatItem(context, Icons.archive_outlined, Colors.orange, archivedCount, 'Archive'),
-                _buildStatItem(context, Icons.delete_outline, Colors.red, trashCount, 'Trash'),
+                _buildStatItem(context, Icons.archive_outlined, Colors.orange,
+                    archivedCount, 'Archive'),
+                _buildStatItem(context, Icons.delete_outline, Colors.red,
+                    trashCount, 'Trash'),
               ],
             ),
           ],
@@ -198,17 +228,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, IconData icon, Color color, int value, String label) {
+  Widget _buildStatItem(BuildContext context, IconData icon, Color color,
+      int value, String label) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12)),
           child: Icon(icon, color: color, size: 28),
         ),
         const SizedBox(height: 8),
-        Text('$value', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Text('$value',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -238,23 +277,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       title: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        style: Theme.of(context)
+            .textTheme
+            .titleMedium
+            ?.copyWith(fontWeight: FontWeight.w600),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             )
           : null,
-      trailing: trailing ?? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
+      trailing: trailing ??
+          Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
-  Widget _buildSettingsCard(BuildContext context, ThemeMode themeMode, WidgetRef ref) {
+  Widget _buildSettingsCard(
+      BuildContext context, ThemeMode themeMode, WidgetRef ref) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -276,7 +320,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onTap: null,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.notifications_outlined,
@@ -294,19 +337,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onTap: null,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: _isSyncing ? Icons.sync_problem : Icons.sync,
             title: 'Sync',
             subtitle: _isSyncing ? 'Syncing...' : _syncStatus,
             trailing: _isSyncing
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : Container(
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: _syncStatus == 'All changes saved' ? Colors.green : Colors.orange,
+                      color: _syncStatus == 'All changes saved'
+                          ? Colors.green
+                          : Colors.orange,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -314,7 +361,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             accentColor: Colors.green,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.archive_outlined,
@@ -324,7 +370,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             accentColor: Colors.orange,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.delete_outline,
@@ -334,7 +379,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             accentColor: Colors.red,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.help_outline,
@@ -344,7 +388,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             accentColor: Colors.blue,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.logout,
@@ -354,7 +397,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             accentColor: Colors.red,
           ),
           const Divider(height: 1),
-
           _buildProfileActionTile(
             context,
             icon: Icons.person_remove_alt_1_outlined,
@@ -373,24 +415,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Help & Support'),
-        content: const Text('For help, contact support at support@monotepro.app or use the in-app feedback option.'),
+        content: const Text(
+            'For help, contact support at mocodex.services@gmail.com or use the in-app feedback option.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close')),
         ],
       ),
     );
   }
 
-  Future<void> _showDeleteAccountDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showDeleteAccountDialog(
+      BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Account'),
-        content: const Text('This will permanently delete your account and all notes associated with it. Continue?'),
+        content: const Text(
+            'This will permanently delete your account and all notes associated with it. Continue?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -409,14 +458,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
       await ref.read(authNotifierProvider.notifier).signOut();
       if (!mounted) return;
-      messenger?.showSnackBar(const SnackBar(content: Text('Account deleted successfully')));
+      messenger?.showSnackBar(
+          const SnackBar(content: Text('Account deleted successfully')));
     } catch (e) {
       if (!mounted) return;
-      messenger?.showSnackBar(SnackBar(content: Text('Unable to delete account: $e')));
+      messenger?.showSnackBar(
+          SnackBar(content: Text('Unable to delete account: $e')));
     }
   }
 
-  void _showNotesList(BuildContext context, WidgetRef ref, {required String filter}) {
+  void _showNotesList(BuildContext context, WidgetRef ref,
+      {required String filter}) {
     final notesAsync = ref.read(allNotesStreamProvider);
     final notes = notesAsync.valueOrNull ?? [];
     final now = DateTime.now();
@@ -425,7 +477,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (filter == 'trash') {
         if (!note.isDeleted) return false;
         final deletedAt = note.deletedAt;
-        if (deletedAt != null && now.difference(deletedAt).inDays >= AppConstants.trashRetentionDays) {
+        if (deletedAt != null &&
+            now.difference(deletedAt).inDays >=
+                AppConstants.trashRetentionDays) {
           Future.microtask(() async {
             if (!context.mounted) return;
             await ref.read(notesActionsProvider).deleteNotePermanently(note.id);
@@ -440,7 +494,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => DraggableScrollableSheet(
         expand: false,
         initialChildSize: 0.7,
@@ -452,11 +507,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(filter == 'archive' ? 'Archived Notes' : 'Trash', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                Text(filter == 'archive' ? 'Archived Notes' : 'Trash',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Expanded(
                   child: filtered.isEmpty
-                      ? Center(child: Text(filter == 'archive' ? 'No archived notes yet' : 'No notes in trash'))
+                      ? Center(
+                          child: Text(filter == 'archive'
+                              ? 'No archived notes yet'
+                              : 'No notes in trash'))
                       : ListView.builder(
                           controller: scrollController,
                           itemCount: filtered.length,
@@ -464,8 +526,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             final note = filtered[index];
                             return Card(
                               child: ListTile(
-                                title: Text(note.title.isEmpty ? 'Untitled' : note.title),
-                                subtitle: Text(note.content.isEmpty ? 'No content' : note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+                                title: Text(note.title.isEmpty
+                                    ? 'Untitled'
+                                    : note.title),
+                                subtitle: Text(
+                                    note.content.isEmpty
+                                        ? 'No content'
+                                        : note.content,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -474,27 +543,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         icon: const Icon(Icons.restore),
                                         onPressed: () async {
                                           Navigator.pop(context);
-                                          final messenger = ScaffoldMessenger.of(context);
-                                          await ref.read(notesActionsProvider).restoreNote(note.id);
+                                          final messenger =
+                                              ScaffoldMessenger.of(context);
+                                          await ref
+                                              .read(notesActionsProvider)
+                                              .restoreNote(note.id);
                                           if (!mounted) return;
-                                          messenger.showSnackBar(const SnackBar(content: Text('Note restored')));
+                                          messenger.showSnackBar(const SnackBar(
+                                              content: Text('Note restored')));
                                         },
                                       ),
                                     IconButton(
-                                      icon: Icon(filter == 'trash' ? Icons.delete_forever : Icons.delete_outline),
+                                      icon: Icon(filter == 'trash'
+                                          ? Icons.delete_forever
+                                          : Icons.delete_outline),
                                       onPressed: () async {
                                         Navigator.pop(context);
-                                        final messenger = ScaffoldMessenger.of(context);
+                                        final messenger =
+                                            ScaffoldMessenger.of(context);
                                         if (filter == 'trash') {
-                                          await ref.read(notesActionsProvider).deleteNotePermanently(note.id);
+                                          await ref
+                                              .read(notesActionsProvider)
+                                              .deleteNotePermanently(note.id);
                                         } else {
-                                          await ref.read(notesActionsProvider).deleteNote(note.id);
+                                          await ref
+                                              .read(notesActionsProvider)
+                                              .deleteNote(note.id);
                                         }
                                         if (!mounted) return;
                                         messenger.showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              filter == 'trash' ? 'Note permanently deleted' : 'Note moved to trash',
+                                              filter == 'trash'
+                                                  ? 'Note permanently deleted'
+                                                  : 'Note moved to trash',
                                             ),
                                           ),
                                         );
@@ -520,13 +602,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Column(
         children: [
           Text(
-            'MoNote Pro v2.0.1',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            'MoNote v2.2.4',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
             'Made by MoCodex',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -544,10 +628,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       // Force refresh of notes from Firestore
       ref.invalidate(notesStreamProvider);
-      
+
       // Wait for the stream to emit new data
       await ref.read(notesStreamProvider.future);
-      
+
       setState(() {
         _isSyncing = false;
         _syncStatus = 'All changes saved';
@@ -580,7 +664,5 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  void onBack() {
-
-  }
+  void onBack() {}
 }

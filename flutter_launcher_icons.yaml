@@ -2,9 +2,6 @@ flutter_launcher_icons:
   android: "monote"          # ← الصح: كل صغير، بدون مسافات
   ios: true
 
-  image_path: "lib/assets/images/logo.png"
-
-  adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "lib/assets/images/logo.png"
+  image_path: "lib/assets/images/logo_foreground.png"
 
   min_sdk_android: 21

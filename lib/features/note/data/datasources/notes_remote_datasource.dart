@@ -29,7 +29,8 @@ abstract class NotesRemoteDataSource {
   Future<void> togglePin(String userId, String noteId, bool newPinValue);
 
   /// Toggles the archive status of a note
-  Future<void> toggleArchive(String userId, String noteId, bool newArchiveValue);
+  Future<void> toggleArchive(
+      String userId, String noteId, bool newArchiveValue);
 }
 
 /// Concrete implementation using Firebase Firestore
@@ -80,9 +81,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
         .collection('notes')
         .doc(noteId)
         .update({
-          'isDeleted': true,
-          'deletedAt': Timestamp.now(),
-        });
+      'isDeleted': true,
+      'deletedAt': Timestamp.now(),
+    });
   }
 
   @override
@@ -93,9 +94,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
         .collection('notes')
         .doc(noteId)
         .update({
-          'isDeleted': false,
-          'deletedAt': FieldValue.delete(),
-        });
+      'isDeleted': false,
+      'deletedAt': FieldValue.delete(),
+    });
   }
 
   @override
@@ -119,7 +120,8 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> toggleArchive(String userId, String noteId, bool newArchiveValue) async {
+  Future<void> toggleArchive(
+      String userId, String noteId, bool newArchiveValue) async {
     await _firestore
         .collection('users')
         .doc(userId)

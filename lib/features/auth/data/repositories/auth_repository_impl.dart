@@ -89,4 +89,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return userModel?.toEntity();
     });
   }
+
+  @override
+  Future<Either<Failure, Unit>> sendPasswordResetEmail(String email) async {
+    try {
+      await _remoteDataSource.sendPasswordResetEmail(email);
+      return const Right(unit);
+    } on AuthFailure catch (e) {
+      return Left(e);
+    } on ServerFailure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
